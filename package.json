@@ -3,7 +3,7 @@
   "version": "1.0.5",
   "repository": {
     "type": "git",
-    "url": "https://bitbucket.org/bhivedevs/cordova-plugin-scan"
+    "url": "https://github.com/NeutrinosPlatform/cordova-plugin-document-scanner"
   },
   "cordova": {
     "id": "cordova-plugin-document-scanner",
