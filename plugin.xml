@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
+        id="cordova-plugin-document-scanner"
+        version="1.0.5">
+
+  <name>Scan</name>
+
+  <engines>
+    <engine name="cordova-android" version=">=6.3.0" />
+  </engines>
+
+  <asset src="www/scan.js" target="js/scan.js"/>
+  
+  <js-module src="www/scan.js" name="scan">
+    <clobbers target="scan" />
+  </js-module>
+
+  <platform name="android">
+
+    <config-file target="res/xml/config.xml" parent="/*">
+      <feature name="Scan">
+        <param name="android-package" value="com.neutrinos.plugin.Scan"/>
+      </feature>
+    </config-file> 
+   
+    <source-file src="src/android/Scan.java" target-dir="src/com/neutrinos/plugin/" />
+    <source-file src="src/android/FileHelper.java" target-dir="src/com/neutrinos/plugin/" />
+   
+    <framework src="src/android/build.gradle" custom="true" type="gradleReference"/>
+  </platform>
+
+</plugin>
