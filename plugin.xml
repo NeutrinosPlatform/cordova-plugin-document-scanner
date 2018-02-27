@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
+        id="cordova-plugin-document-scanner"
+        version="1.0.6">
+
+  <name>Scan</name>
+
+  <engines>
+    <engine name="cordova-android" version=">=6.3.0" />
+  </engines>
+
+  <asset src="www/scan.js" target="js/scan.js"/>
+  
+  <js-module src="www/scan.js" name="scan">
+    <clobbers target="scan" />
+  </js-module>
+
+  <platform name="android">
+
+    <config-file target="res/xml/config.xml" parent="/*">
+      <feature name="Scan">
+        <param name="android-package" value="com.neutrinos.plugin.Scan"/>
+      </feature>
+    </config-file> 
+   
+    <source-file src="src/android/Scan.java" target-dir="src/com/neutrinos/plugin/" />
+    <source-file src="src/android/FileHelper.java" target-dir="src/com/neutrinos/plugin/" />
+   
+    <framework src="src/android/build.gradle" custom="true" type="gradleReference"/>
+  </platform>
+
+  <platform name="ios">
+    
+    <config-file target="config.xml" parent="/*">
+      <feature name="Scan">
+        <param name="ios-package" value="Scan" />
+      </feature>
+    </config-file>
+
+    <source-file src="src/ios/Scan/ScanPlugin.swift" />
+    <source-file src="src/ios/Scan.swift" />
+    <header-file src="src/ios/scan-Bridging-Header.h" />
+
+    <config-file target="*-Info.plist">
+      <array>
+        <string>NSCameraUsageDescription</string>
+        <string>need camera access to take pictures</string>
+      </array>
+    </config-file>
+
+    <resource-file src="src/ios/DynamsoftCameraSDKResource.bundle" />
+
+    <framework src="libstdc++.tbd" />
+    <framework src="libsqlite3.tbd" />
+    <framework src="src/ios/DynamsoftCameraSDK.framework" custom="true" />
+
+    <hook type="before_plugin_install" src="scripts/beforePluginInstall.js" />
+      
+    <dependency id="cordova-plugin-add-swift-support" version="1.7.1"/>
+
+    <preference name="UseSwiftLanguageVersion" default="4" />
+
+  </platform>
+
+</plugin>

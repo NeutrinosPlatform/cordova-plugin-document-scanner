@@ -1,0 +1,33 @@
+{
+  "name": "cordova-plugin-document-scanner",
+  "version": "1.0.6",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/NeutrinosPlatform/cordova-plugin-document-scanner"
+  },
+  "cordova": {
+    "id": "cordova-plugin-document-scanner",
+    "platforms": [
+      "android"
+    ]
+  },
+  "keywords": [
+    "cordova",
+    "camera",
+    "document",
+    "scan",
+    "ecosystem:cordova",
+    "cordova-android"
+  ],
+  "engines": {
+    "cordovaDependencies": {
+      "cordova-android": ">=6.3.0"
+    }
+  },
+  "author": "jatahworx",
+  "license": "ISC",
+  "description": "cordova plugin for document scanner",
+  "dependencies": {
+    "cordova-sqlite-storage-dependencies": "1.1.0"
+  }
+}

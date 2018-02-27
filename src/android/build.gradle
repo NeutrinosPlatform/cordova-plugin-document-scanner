@@ -1,0 +1,11 @@
+allprojects {
+	repositories {
+		maven { 
+			url 'https://jitpack.io' 
+		}
+	}
+}
+
+dependencies {
+	compile 'com.github.NeutrinosPlatform:scanlibrary:8a0399887e'
+}
