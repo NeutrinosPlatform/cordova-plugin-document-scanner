@@ -7,5 +7,5 @@ allprojects {
 }
 
 dependencies {
-	implementation 'com.github.NeutrinosPlatform:scanlibrary:8a0399887e'
+	compile 'com.github.NeutrinosPlatform:scanlibrary:8a0399887e'
 }
