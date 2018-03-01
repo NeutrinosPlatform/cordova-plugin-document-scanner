@@ -39,6 +39,7 @@ example:
 __Supported Platforms__
 
 - Android
+- iOS
 
 **Example**  
 ```js
@@ -59,3 +60,13 @@ Take a photo and retrieve the image's file location:
     function onFail(message) {
         alert('Failed because: ' + message);
     }
+
+## 'iOS Quirks'
+
+Add permission to access photo library. Note :- Camera access permission in info.plist is already given so it is not required to add it.
+
+<edit-config target="NSPhotoLibraryUsageDescription" file="*-Info.plist" mode="merge">
+<string>need photo library access to get pictures from there</string>
+</edit-config>
+
+NOTE :- iOS has only document scan via camera for now (Any argument passed will start the camera scan). Document Scan from gallery will be available in future version
