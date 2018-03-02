@@ -47,6 +47,13 @@
         </array>
     </config-file>
     
+    <config-file target="*-Info.plist">
+        <array>
+            <string>NSCameraUsageDescription</string>
+            <string>need camera access to scan</string>
+        </array>
+    </config-file>
+    
 <!--    <config-file target="*-Info.plist" parent="UIBackgroundModes">-->
 <!--        <array>-->
 <!--            <string>remote-notification</string>-->

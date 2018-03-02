@@ -63,10 +63,6 @@ Take a photo and retrieve the image's file location:
 
 ## 'iOS Quirks'
 
-Add permission to access photo library. Note :- Camera access permission in info.plist is already given so it is not required to add it.
+NOTE :- iOS has only document scan via camera for now (Any argument passed will start the camera scan). Document Scan from gallery will be available in future version.
 
-<edit-config target="NSPhotoLibraryUsageDescription" file="*-Info.plist" mode="merge">
-<string>need photo library access to get pictures from there</string>
-</edit-config>
-
-NOTE :- iOS has only document scan via camera for now (Any argument passed will start the camera scan). Document Scan from gallery will be available in future version
+An example file URI obtained from success call back of scanDoc function looks like this  file:///var/mobile/Containers/Data/Application/8376778A-983B-4FBA-B21C-A4CFDD047AAA/Documents/image.png

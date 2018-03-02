@@ -10,8 +10,8 @@
     _commandglo = command;
     NSString* name = [[_commandglo arguments] objectAtIndex:0];
     
-    NSLog(@"%s","I AM HERE AT THE STAAAAAART!!!");
-    NSLog(@"%@",name);
+    //NSLog(@"%s","I AM HERE AT THE STAAAAAART!!!");
+    //NSLog(@"%@",name);
     IRLScannerViewController *scanner = [IRLScannerViewController standardCameraViewWithDelegate:self];
     scanner.showControls = YES;
     scanner.showAutoFocusWhiteRectangle = YES;
@@ -42,7 +42,7 @@
 }
 
 -(void)pageSnapped:(UIImage *)page_image from:(UIViewController *)controller {
-    NSLog(@"%s","Page Snapped....");
+    //NSLog(@"%s","Page Snapped....");
     [controller dismissViewControllerAnimated:YES completion:^{
         
         // [self.scannedImage setImage:page_image];
@@ -52,7 +52,7 @@
         NSString *documentsPath = [paths objectAtIndex:0]; //Get the docs directory
         NSString *filePath = [documentsPath stringByAppendingPathComponent:@"image.png"]; //Add the file name
         [pngData writeToFile:filePath atomically:YES]; //Write the file
-        NSLog(@"%s","Page Snapped.222...");
+        //NSLog(@"%s","Page Snapped.222...");
         
         ////// One line code to save to photo library , but no way to obtain the file path //UIImageWriteToSavedPhotosAlbum(page_image, nil, nil, nil);
         
@@ -73,12 +73,18 @@
         ////////////////////
         
         
-           // NSString* name = [[_commandglo arguments] objectAtIndex:0];
-           // NSString* msg = [NSString stringWithFormat: @"Hello, %@", name];
+        // NSString* name = [[_commandglo arguments] objectAtIndex:0];
+        // NSString* msg = [NSString stringWithFormat: @"Hello, %@", name];
         //
+        NSString *appendfilestr = @"file://";
+        //NSString *string2 = @" a test.";
+        NSString *filePathcomplete = [appendfilestr stringByAppendingString:filePath];
+        // string3 is now @"This is a test."  string1 and string2 are unchanged.
+        
+        
             CDVPluginResult* result = [CDVPluginResult
                                        resultWithStatus:CDVCommandStatus_OK
-                                       messageAsString:filePath];
+                                       messageAsString:filePathcomplete];
         //
             [self.commandDelegate sendPluginResult:result callbackId:_commandglo.callbackId];
         
