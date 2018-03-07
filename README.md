@@ -13,8 +13,10 @@ Although the object is attached to the global scoped `window`, it is not availab
 
 
 This requires cordova 5.0+
+npm link :- https://www.npmjs.com/package/cordova-plugin-document-scanner
 
     cordova plugin add cordova-plugin-document-scanner
+    
 
 ### scan.scanDoc(sourceType, successCallback, errorCallback)
 Takes a photo using the scan, or retrieves a photo from the device's
@@ -70,11 +72,18 @@ An example file URI obtained from success call back of scanDoc function looks li
 ## Credits / Native library links
 
 Android :- https://github.com/jhansireddy/AndroidScannerDemo
-iOs :- https://github.com/charlymr/IRLDocumentScanner
+iOS :- https://github.com/charlymr/IRLDocumentScanner
 
 Huge thanks to these authors for making their document scanning native libraries public.
 
 ## More about us!
 
 Find out more or contact us directly here :- http://www.neutrinos.co/
+
+Facebook :- https://www.facebook.com/Neutrinos.co/
+LinkedIn :- https://www.linkedin.com/company/25057297/
+Twitter :- https://twitter.com/Neutrinosco
+Instagram :- https://www.instagram.com/neutrinos.co/
+
+
 
