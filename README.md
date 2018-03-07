@@ -61,8 +61,20 @@ Take a photo and retrieve the image's file location:
         alert('Failed because: ' + message);
     }
 
-## 'iOS Quirks'
+## iOS Quirks
 
 NOTE :- iOS has only document scan via camera for now (Any argument passed will start the camera scan). Document Scan from gallery will be available in future version.
 
 An example file URI obtained from success call back of scanDoc function looks like this  file:///var/mobile/Containers/Data/Application/8376778A-983B-4FBA-B21C-A4CFDD047AAA/Documents/image.png
+
+## Credits / Native library links
+
+Android :- https://github.com/jhansireddy/AndroidScannerDemo
+iOs :- https://github.com/charlymr/IRLDocumentScanner
+
+Huge thanks to these authors for making their document scanning native libraries public.
+
+## More about us!
+
+Find out more or contact us directly here :- http://www.neutrinos.co/
+
