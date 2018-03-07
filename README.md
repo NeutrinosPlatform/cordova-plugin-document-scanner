@@ -71,8 +71,7 @@ An example file URI obtained from success call back of scanDoc function looks li
 
 ## Credits / Native library links
 
-Android :- https://github.com/jhansireddy/AndroidScannerDemo
-
+Android :- https://github.com/jhansireddy/AndroidScannerDemo <br/>
 iOS :- https://github.com/charlymr/IRLDocumentScanner
 
 Huge thanks to these authors for making their document scanning native libraries public.
@@ -81,12 +80,9 @@ Huge thanks to these authors for making their document scanning native libraries
 
 Find out more or contact us directly here :- http://www.neutrinos.co/
 
-Facebook :- https://www.facebook.com/Neutrinos.co/
-
-LinkedIn :- https://www.linkedin.com/company/25057297/
-
-Twitter :- https://twitter.com/Neutrinosco
-
+Facebook :- https://www.facebook.com/Neutrinos.co/ <br/>
+LinkedIn :- https://www.linkedin.com/company/25057297/ <br/>
+Twitter :- https://twitter.com/Neutrinosco <br/>
 Instagram :- https://www.instagram.com/neutrinos.co/
 
 
