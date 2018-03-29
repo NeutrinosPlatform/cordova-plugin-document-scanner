@@ -12,7 +12,7 @@ Although the object is attached to the global scoped `window`, it is not availab
 ## Installation
 
 
-This requires cordova 5.0+
+This requires cordova 7.1.0+
 npm link :- https://www.npmjs.com/package/cordova-plugin-document-scanner
 
     cordova plugin add cordova-plugin-document-scanner
