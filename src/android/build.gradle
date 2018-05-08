@@ -7,5 +7,5 @@ allprojects {
 }
 
 dependencies {
-	compile 'com.github.NeutrinosPlatform:scanlibrary:f960cf61d3'
+	compile 'com.github.NeutrinosPlatform:scanlibrary:master-SNAPSHOT'
 }
