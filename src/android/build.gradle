@@ -7,5 +7,9 @@ allprojects {
 }
 
 dependencies {
-	compile 'com.github.NeutrinosPlatform:scanlibrary:master-SNAPSHOT'
+	implementation 'com.github.NeutrinosPlatform:scanlibrary:master-SNAPSHOT'
+}
+
+configurations.all {
+    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
 }
