@@ -69,6 +69,19 @@ NOTE :- iOS has only document scan via camera for now (Any argument passed will 
 
 An example file URI obtained from success call back of scanDoc function looks like this  file:///var/mobile/Containers/Data/Application/8376778A-983B-4FBA-B21C-A4CFDD047AAA/Documents/image.png
 
+## Issues and Fixes
+
+- Error:Execution failed for task ':app:transformNativeLibsWithStripDebugSymbolForDebug'
+    Delete local ndk-bundle folder. Example location :- C:\Users\Administrator\AppData\Local\Android\sdk\ndk-bundle
+    
+- CropViewController fails in Xcode due to Incompatible Swift Versions
+    Refer issue [13](https://github.com/NeutrinosPlatform/cordova-plugin-document-scanner/issues/13)
+    
+- Couldn't find "libopencv_java3.so"
+    Refer issue [8](https://github.com/NeutrinosPlatform/cordova-plugin-document-scanner/issues/8)
+    
+- iOS scan UI buttons documentation
+    Refer issue [15](https://github.com/NeutrinosPlatform/cordova-plugin-document-scanner/issues/15)
 ## Credits / Native library links
 
 Android :- https://github.com/jhansireddy/AndroidScannerDemo <br/>
