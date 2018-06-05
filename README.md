@@ -71,17 +71,17 @@ An example file URI obtained from success call back of scanDoc function looks li
 
 ## Issues and Fixes
 
-- Error:Execution failed for task ':app:transformNativeLibsWithStripDebugSymbolForDebug'
+- Error:Execution failed for task ':app:transformNativeLibsWithStripDebugSymbolForDebug' <br/>
     Delete local ndk-bundle folder. Example location :- C:\Users\Administrator\AppData\Local\Android\sdk\ndk-bundle
     
-- CropViewController fails in Xcode due to Incompatible Swift Versions
+- CropViewController fails in Xcode due to Incompatible Swift Versions <br/>
     Refer issue [13](https://github.com/NeutrinosPlatform/cordova-plugin-document-scanner/issues/13)
     
-- Couldn't find "libopencv_java3.so"
+- Couldn't find "libopencv_java3.so" <br/>
     Refer issue [8](https://github.com/NeutrinosPlatform/cordova-plugin-document-scanner/issues/8)
     
-- iOS scan UI buttons documentation
-    Refer issue [15](https://github.com/NeutrinosPlatform/cordova-plugin-document-scanner/issues/15)
+- iOS scan UI buttons documentation <br/>
+    Refer issue [15](https://github.com/NeutrinosPlatform/cordova-plugin-document-scanner/issues/15) <br/>
 ## Credits / Native library links
 
 Android :- https://github.com/jhansireddy/AndroidScannerDemo <br/>
