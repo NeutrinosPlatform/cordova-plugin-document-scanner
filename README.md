@@ -17,6 +17,7 @@ npm link :- https://www.npmjs.com/package/cordova-plugin-document-scanner
 
     cordova plugin add cordova-plugin-document-scanner
     
+*Please read issues and fixes section of readme for Ionic installation and Android Oreo support*    
 
 ### scan.scanDoc(sourceType, successCallback, errorCallback)
 Takes a photo using the scan, or retrieves a photo from the device's
@@ -40,7 +41,7 @@ example:
 
 __Supported Platforms__
 
-- Android
+- Android (For Android Oreo support please read Issues and Fixes section)
 - iOS
 
 **Example**  
@@ -77,11 +78,18 @@ An example file URI obtained from success call back of scanDoc function looks li
 - CropViewController fails in Xcode due to Incompatible Swift Versions <br/>
     Refer issue [13](https://github.com/NeutrinosPlatform/cordova-plugin-document-scanner/issues/13)
     
-- Couldn't find "libopencv_java3.so" <br/>
+- Couldn't find "libopencv_java3.so" [Problem mainly with 64 bit build devices]<br/>
     Refer issue [8](https://github.com/NeutrinosPlatform/cordova-plugin-document-scanner/issues/8)
     
 - iOS scan UI buttons documentation <br/>
-    Refer issue [15](https://github.com/NeutrinosPlatform/cordova-plugin-document-scanner/issues/15) <br/>
+    Refer issue [15](https://github.com/NeutrinosPlatform/cordova-plugin-document-scanner/issues/15)
+
+- Adding plugin in Ionic <br/> 
+    Refer 6th response in issue [17](https://github.com/NeutrinosPlatform/cordova-plugin-document-scanner/issues/17)
+
+- Android Oreo Support / Failure delivering result ResultInfo <br/>
+    Refer issue [19](https://github.com/NeutrinosPlatform/cordova-plugin-document-scanner/issues/19) & [17](https://github.com/NeutrinosPlatform/cordova-plugin-document-scanner/issues/17) <br/>
+    
 ## Credits / Native library links
 
 Android :- https://github.com/jhansireddy/AndroidScannerDemo <br/>
