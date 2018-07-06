@@ -17,7 +17,7 @@ npm link :- https://www.npmjs.com/package/cordova-plugin-document-scanner
 
     cordova plugin add cordova-plugin-document-scanner
     
-*Please read issues and fixes section of readme for Ionic installation and Android Oreo support*    
+*Please read issues and fixes section of readme for Ionic & PhoneGap installation and Android Oreo support*    
 
 ### scan.scanDoc(sourceType, successCallback, errorCallback)
 Takes a photo using the scan, or retrieves a photo from the device's
@@ -38,6 +38,8 @@ You can do whatever you want with the URI, for
 example:
 
 - Render the image in an `<img>` tag.
+
+*Adds file:// in front of the imageuri returned for both android and ios [iOS example imageURI returned :- file:///var/mobile/Containers/Data/Application/8376778A-983B-4FBA-B21C-A4CFDD047AAA/Documents/image.png]*
 
 __Supported Platforms__
 
@@ -66,7 +68,7 @@ Take a photo and retrieve the image's file location:
 
 ## iOS Quirks
 
-NOTE :- iOS has only document scan via camera for now (Any argument passed will start the camera scan). Document Scan from gallery will be available in future version.
+NOTE :- iOS has only document scan via camera for now (Any argument passed will start the camera scan). Document Scan from gallery will be available in future version. Also scanned images aren't saved to the gallery in iOS.
 
 An example file URI obtained from success call back of scanDoc function looks like this  file:///var/mobile/Containers/Data/Application/8376778A-983B-4FBA-B21C-A4CFDD047AAA/Documents/image.png
 
@@ -86,6 +88,12 @@ An example file URI obtained from success call back of scanDoc function looks li
 
 - Adding plugin in Ionic <br/> 
     Refer 6th response in issue [17](https://github.com/NeutrinosPlatform/cordova-plugin-document-scanner/issues/17)
+
+- Adding plugin in PhoneGap <br/> 
+    Refer entire issue [22](https://github.com/NeutrinosPlatform/cordova-plugin-document-scanner/issues/22)
+    
+- iOS: multiple scan does not override the first image <br/> 
+    Refer entire issue [10](https://github.com/NeutrinosPlatform/cordova-plugin-document-scanner/issues/10) 
 
 - Android Oreo Support / Failure delivering result ResultInfo <br/>
     Refer issue [19](https://github.com/NeutrinosPlatform/cordova-plugin-document-scanner/issues/19) & [17](https://github.com/NeutrinosPlatform/cordova-plugin-document-scanner/issues/17) <br/>
