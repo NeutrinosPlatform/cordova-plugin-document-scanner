@@ -1,5 +1,7 @@
 # cordova-plugin-document-scanner
 
+> *Note :- Please raise a pull request if there are fixes or enhancements that you want to add!* 
+
 This plugin defines a global `scan` object, which provides an API for scan the document from taking pictures and choosing image from the system's library. 
 
 Although the object is attached to the global scoped `window`, it is not available until after the `deviceready` event.
