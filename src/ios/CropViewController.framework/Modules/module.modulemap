@@ -1,4 +1,0 @@
-framework module CropViewController {
-    header "CropViewController-Swift.h"
-    requires objc
-}
