@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
         id="cordova-plugin-document-scanner"
-        version="2.0.0">
+        version="2.0.1">
 
   <name>Scan</name>
 
@@ -40,12 +40,12 @@
       </feature>
     </config-file>
     
-    <config-file target="*-Info.plist">
+<!--     <config-file target="*-Info.plist">
         <array>
             <string>NSPhotoLibraryUsageDescription</string>
             <string>need photo library access to save pictures there</string>
         </array>
-    </config-file>
+    </config-file> -->
     
 <!--     <config-file target="*-Info.plist">
         <array>
@@ -57,6 +57,11 @@
           <preference name="CAMERA_USAGE_DESCRIPTION" default="This app needs camera access"/>
             <config-file target="*-Info.plist" parent="NSCameraUsageDescription">
                 <string>$CAMERA_USAGE_DESCRIPTION</string>
+            </config-file>
+          
+          <preference name="PHOTOLIBRARY_USAGE_DESCRIPTION" default="This app needs read/write-access photo library access"/>
+            <config-file target="*-Info.plist" parent="NSPhotoLibraryUsageDescription">
+                <string>$PHOTOLIBRARY_USAGE_DESCRIPTION</string>
             </config-file>
           
     
