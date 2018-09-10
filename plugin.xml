@@ -47,12 +47,18 @@
         </array>
     </config-file>
     
-    <config-file target="*-Info.plist">
+<!--     <config-file target="*-Info.plist">
         <array>
             <string>NSCameraUsageDescription</string>
             <string>need camera access to scan</string>
         </array>
-    </config-file>
+    </config-file> -->
+          
+          <preference name="CAMERA_USAGE_DESCRIPTION" default="This app needs camera access"/>
+            <config-file target="*-Info.plist" parent="NSCameraUsageDescription">
+                <string>$CAMERA_USAGE_DESCRIPTION</string>
+            </config-file>
+          
     
 <!--    <config-file target="*-Info.plist" parent="UIBackgroundModes">-->
 <!--        <array>-->
