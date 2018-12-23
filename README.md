@@ -19,7 +19,7 @@ npm link :- https://www.npmjs.com/package/cordova-plugin-document-scanner
 
     cordova plugin add cordova-plugin-document-scanner
     
-*Please read issues and fixes section of readme for Ionic & PhoneGap installation and Android Oreo support*    
+*Please read issues and fixes section of readme for Ionic & PhoneGap installation*    
 
 ### scan.scanDoc(sourceType, successCallback, errorCallback)
 Takes a photo using the scan, or retrieves a photo from the device's
@@ -97,7 +97,7 @@ An example file URI obtained from success call back of scanDoc function looks li
 - iOS: multiple scan does not override the first image <br/> 
     Refer entire issue [10](https://github.com/NeutrinosPlatform/cordova-plugin-document-scanner/issues/10) 
 
-- Android Oreo Support / Failure delivering result ResultInfo <br/>
+- Android Oreo Support / Failure delivering result ResultInfo (Not required anymore!) <br/>
     Refer issue [19](https://github.com/NeutrinosPlatform/cordova-plugin-document-scanner/issues/19) & [17](https://github.com/NeutrinosPlatform/cordova-plugin-document-scanner/issues/17) <br/>
     
 ## Credits / Native library links
