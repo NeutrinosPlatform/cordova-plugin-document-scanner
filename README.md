@@ -45,7 +45,7 @@ example:
 
 __Supported Platforms__
 
-- Android (For Android Oreo support please read Issues and Fixes section)
+- Android
 - iOS
 
 **Example**  
