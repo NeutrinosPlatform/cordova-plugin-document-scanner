@@ -61,7 +61,8 @@ Take a photo and retrieve the image's file location:
 
     function onSuccess(imageURI) {
         var image = document.getElementById('myImage');
-        image.src = imageURI;
+        image.src = imageURI; // For iOS, use image.src = imageURI + '?' + Date.now(); to solve issue 10
+
     }
 
     function onFail(message) {
@@ -97,8 +98,8 @@ An example file URI obtained from success call back of scanDoc function looks li
 - iOS: multiple scan does not override the first image <br/> 
     Refer entire issue [10](https://github.com/NeutrinosPlatform/cordova-plugin-document-scanner/issues/10) 
 
-- Android Oreo Support / Failure delivering result ResultInfo (Not required anymore!) <br/>
-    Refer issue [19](https://github.com/NeutrinosPlatform/cordova-plugin-document-scanner/issues/19) & [17](https://github.com/NeutrinosPlatform/cordova-plugin-document-scanner/issues/17) <br/>
+- Multiple scans don't override the first image | Browser caching issue <br/>
+    Refer issue [10](https://github.com/NeutrinosPlatform/cordova-plugin-document-scanner/issues/10) <br/>
     
 ## Credits / Native library links
 
