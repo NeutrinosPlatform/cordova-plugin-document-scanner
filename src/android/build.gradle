@@ -7,7 +7,7 @@ allprojects {
 }
 
 dependencies {
-	implementation 'com.github.NeutrinosPlatform:scanlibrary:master-54a81e4137-1'
+	implementation 'com.github.NeutrinosPlatform:scanlibrary:-SNAPSHOT'
 
 }
 
