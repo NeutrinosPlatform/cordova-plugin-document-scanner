@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
         id="cordova-plugin-document-scanner"
-        version="2.0.2">
+        version="3.0.0">
 
   <name>Scan</name>
 
@@ -16,7 +16,8 @@
   </js-module>
 
 
-<!--  <dependency id="cordova-plugin-cocoapod-support" version="1.3.0" />-->
+
+<!--  <dependency id="cordova-plugin-add-swift-support" version="1.7.2"/>-->
 
   <platform name="android">
 
@@ -34,69 +35,81 @@
 
 
   <platform name="ios">
-    <config-file target="config.xml" parent="/*">
-      <feature name="Scan">
+        <dependency id="cordova-plugin-cocoapod-support" version="1.3.0" />
+        <pods-config ios-min-version="10.0" use-frameworks="true">
+        <!-- optionally add private spec sources -->
+        <!--          <source url="git@github.com:foo/foo-specs.git"/>-->
+        <!--          <source url="git@github.com:bar/bar-specs.git"/>-->
+        </pods-config>
+        <!-- use the latest version of a pod -->
+        <pod name="WeScan" />
+
+        <config-file target="config.xml" parent="/*">
+        <feature name="Scan">
         <param name="ios-package" value="Scan" />
-      </feature>
-    </config-file>
-    
-<!--     <config-file target="*-Info.plist">
+        </feature>
+        </config-file>
+
+        <!--     <config-file target="*-Info.plist">
         <array>
-            <string>NSPhotoLibraryUsageDescription</string>
-            <string>need photo library access to save pictures there</string>
+        <string>NSPhotoLibraryUsageDescription</string>
+        <string>need photo library access to save pictures there</string>
         </array>
-    </config-file> -->
-    
-<!--     <config-file target="*-Info.plist">
+        </config-file> -->
+
+        <!--     <config-file target="*-Info.plist">
         <array>
-            <string>NSCameraUsageDescription</string>
-            <string>need camera access to scan</string>
+        <string>NSCameraUsageDescription</string>
+        <string>need camera access to scan</string>
         </array>
-    </config-file> -->
-          
-          <preference name="CAMERA_USAGE_DESCRIPTION" default="This app needs camera access"/>
-            <config-file target="*-Info.plist" parent="NSCameraUsageDescription">
-                <string>$CAMERA_USAGE_DESCRIPTION</string>
-            </config-file>
-          
-          <preference name="PHOTOLIBRARY_USAGE_DESCRIPTION" default="This app needs read/write-access photo library access"/>
-            <config-file target="*-Info.plist" parent="NSPhotoLibraryUsageDescription">
-                <string>$PHOTOLIBRARY_USAGE_DESCRIPTION</string>
-            </config-file>
-          
-    
-<!--    <config-file target="*-Info.plist" parent="UIBackgroundModes">-->
-<!--        <array>-->
-<!--            <string>remote-notification</string>-->
-<!--            <string>voip</string>-->
-<!--        </array>-->
-<!--    </config-file>-->
-<!--    <config-file target="*-Debug.plist" parent="aps-environment">-->
-<!--        <string>development</string>-->
-<!--    </config-file>-->
-<!--    <config-file target="*-Release.plist" parent="aps-environment">-->
-<!--        <string>production</string>-->
-<!--    </config-file>-->
+        </config-file> -->
+
+        <preference name="CAMERA_USAGE_DESCRIPTION" default="This app needs camera access"/>
+        <config-file target="*-Info.plist" parent="NSCameraUsageDescription">
+            <string>$CAMERA_USAGE_DESCRIPTION</string>
+        </config-file>
+
+        <preference name="PHOTOLIBRARY_USAGE_DESCRIPTION" default="This app needs read/write-access photo library access"/>
+        <config-file target="*-Info.plist" parent="NSPhotoLibraryUsageDescription">
+            <string>$PHOTOLIBRARY_USAGE_DESCRIPTION</string>
+        </config-file>
 
 
-<header-file src="src/ios/Scan.h" target-dir="ScanPlugin"/>
-<source-file src="src/ios/Scan.m" target-dir="ScanPlugin"/>
+        <!--    <config-file target="*-Info.plist" parent="UIBackgroundModes">-->
+        <!--        <array>-->
+        <!--            <string>remote-notification</string>-->
+        <!--            <string>voip</string>-->
+        <!--        </array>-->
+        <!--    </config-file>-->
+        <!--    <config-file target="*-Debug.plist" parent="aps-environment">-->
+        <!--        <string>development</string>-->
+        <!--    </config-file>-->
+        <!--    <config-file target="*-Release.plist" parent="aps-environment">-->
+        <!--        <string>production</string>-->
+        <!--    </config-file>-->
 
-<!-- <framework src="src/ios/CropViewController.framework" custom="true" embed="true"/> -->
-<framework src="src/ios/TOCropViewController.framework" custom="true" embed="true"/>
-<framework src="src/ios/IRLDocumentScanner.framework" custom="true" embed="true"/>
-<!--<header-file src="src/ios/Scanui.h" target-dir="ScanPlugin"/>-->
-<!--<source-file src="src/ios/Scanui.m" target-dir="ScanPlugin"/>-->
-    
-<!--    <pods-config ios-min-version="8.0" use-frameworks="true"/>-->
-<!--    <pod id="IRLDocumentScanner" version="0.3.1"/>-->
-<!--<pod id="TOCropViewController" version="2.3.6"/>-->
+        <header-file src="src/ios/Bridging-Header.h" target-dir="ScanPlugin"/>
+        <source-file src="src/ios/Scan.swift" target-dir="ScanPlugin"/>
 
-<!--         <framework src="IRLDocumentScanner" type="podspec" spec="~> 0.3.1" />-->
-<!--     <framework src="TOCropViewController" type="podspec" spec="~> 2.3.6" />-->
-<!--     <framework src="OpenSSL" type="podspec" spec="~> 1.0.0" />-->
 
- 
+        <!--<header-file src="src/ios/Scan.h" target-dir="ScanPlugin"/>-->
+        <!--<source-file src="src/ios/Scan.m" target-dir="ScanPlugin"/>-->
+
+        <!-- <framework src="src/ios/CropViewController.framework" custom="true" embed="true"/> -->
+        <!--<framework src="src/ios/TOCropViewController.framework" custom="true" embed="true"/>-->
+        <!--<framework src="src/ios/IRLDocumentScanner.framework" custom="true" embed="true"/>-->
+        <!--<header-file src="src/ios/Scanui.h" target-dir="ScanPlugin"/>-->
+        <!--<source-file src="src/ios/Scanui.m" target-dir="ScanPlugin"/>-->
+
+        <!--    <pods-config ios-min-version="8.0" use-frameworks="true"/>-->
+        <!--    <pod id="IRLDocumentScanner" version="0.3.1"/>-->
+        <!--<pod id="TOCropViewController" version="2.3.6"/>-->
+
+        <!--         <framework src="IRLDocumentScanner" type="podspec" spec="~> 0.3.1" />-->
+        <!--     <framework src="TOCropViewController" type="podspec" spec="~> 2.3.6" />-->
+        <!--     <framework src="OpenSSL" type="podspec" spec="~> 1.0.0" />-->
+
+
   </platform>
 
 </plugin>
