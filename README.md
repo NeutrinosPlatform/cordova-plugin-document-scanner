@@ -131,7 +131,7 @@ An example file URI obtained from success call back of scanDoc function looks li
 ## Credits / Native library links
 
 Android :- https://github.com/jhansireddy/AndroidScannerDemo <br/>
-iOS :- https://github.com/charlymr/IRLDocumentScanner
+iOS :- https://github.com/WeTransfer/WeScan
 
 Huge thanks to these authors for making their document scanning native libraries public.
 
