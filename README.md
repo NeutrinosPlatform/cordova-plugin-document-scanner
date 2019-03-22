@@ -17,7 +17,8 @@ Although the object is attached to the global scoped `window`, it is not availab
 This requires cordova 7.1.0+ and cordova android 6.4.0+ <br/>
 npm link :- https://www.npmjs.com/package/cordova-plugin-document-scanner
 
-    cordova plugin add cordova-plugin-document-scanner
+> lot of breaking changes coming in 3.x.x so please use the following to get the stable 2.x.x version
+    cordova plugin add cordova-plugin-document-scanner@2.x.x
     
 *Please read issues and fixes section of readme for Ionic & PhoneGap installation*    
 
