@@ -57,23 +57,50 @@ scan.scanDoc(sourceType, scanSuccess, scanError);
 
 Take a photo and retrieve the image's file location:
 
+    > versions 2.x.x
+    ```
     scan.scanDoc(0, onSuccess, onFail);
 
     function onSuccess(imageURI) {
-        var image = document.getElementById('myImage');
-        image.src = imageURI; // For iOS, use image.src = imageURI + '?' + Date.now(); to solve issue 10
+        alert(imageURI);
+        console.log(imageURI);
+        //var image = document.getElementById('myImage');
+        //image.src = imageURI; // For iOS, use image.src = imageURI + '?' + Date.now(); to solve issue 10
 
     }
 
     function onFail(message) {
         alert('Failed because: ' + message);
     }
+    ```
 
+    > version 3.x.x example below | Please follow the ios Quirks steps below to get the build to succeed
+    ```
+    scan.scanDoc(onSuccess, onFail, {sourceType:1}); // sourceType will by default take value 1 if no value is set | 0 for gallery | 1 for camera
+
+    function onSuccess(imageURI) {
+        alert(imageURI);
+        console.log(imageURI);
+        //var image = document.getElementById('myImage');
+        //image.src = imageURI; // For iOS, use image.src = imageURI + '?' + Date.now(); to solve issue 10
+
+    }
+
+    function onFail(message) {
+        alert('Failed because: ' + message);
+    }
+    ```
 ## iOS Quirks
 
 NOTE :- iOS has only document scan via camera for now (Any argument passed will start the camera scan). Document Scan from gallery will be available in future version. Also scanned images aren't saved to the gallery in iOS.
 
 An example file URI obtained from success call back of scanDoc function looks like this  file:///var/mobile/Containers/Data/Application/8376778A-983B-4FBA-B21C-A4CFDD047AAA/Documents/image.png
+
+> for version 3.x.x also keep the following in mind
+> - Open xcworkspace file using xcode within the platforms/ios folder. 
+> - Select the project, this opens up project settings. Now within General set deployment target in xcode as 10 or above
+> - In build settings set swift language version to 4.0
+> - In build settings set Objective C bridging header to HelloCordova/Plugins/cordova-plugin-document-scanner/ScanPlugin/Bridging-Header.h where HelloCordova is your project name
 
 ## Issues and Fixes
 
