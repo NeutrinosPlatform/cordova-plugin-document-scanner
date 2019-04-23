@@ -8,41 +8,58 @@
 - (void)scanDoc:(CDVInvokedUrlCommand*)command
 {
     _commandglo = command;
-    NSString* name = [[_commandglo arguments] objectAtIndex:0];
+    NSString* sourceType = [[_commandglo arguments] objectAtIndex:0];
+    NSString* fileName = [[_commandglo arguments] objectAtIndex:1];
     
     //NSLog(@"%s","I AM HERE AT THE STAAAAAART!!!");
     //NSLog(@"%@",name);
-    IRLScannerViewController *scanner = [IRLScannerViewController standardCameraViewWithDelegate:self];
+    //IRLScannerViewController *scanner = [IRLScannerViewController standardCameraViewWithDelegate:self];
+
+    // [IRLScannerViewController attemptRotationToDeviceOrientation];
+
+    IRLScannerViewController *scanner = [IRLScannerViewController
+                                         cameraViewWithDefaultType: IRLScannerViewTypeNormal
+                                         defaultDetectorType: IRLScannerDetectorTypePerformance
+                                         withDelegate:self];
+    //[scanner preferredInterfaceOrientationForPresentatio];
     scanner.showControls = YES;
     scanner.showAutoFocusWhiteRectangle = YES;
+    
+    //[TOCropViewController attemptRotationToDeviceOrientation];
+    //[scanner viewDidAppear:<#(BOOL)#>];
+    //[[self topViewController] attemptRotationToDeviceOrientation];
+    
     [[self topViewController] presentViewController:scanner animated:YES completion:nil];
     
-//    Scanui* scanui = [[Scanui alloc] init];
-//    [scanui viewDidLoad];
-//    UIView* cview = [self webView];
-//
-//    [scanui scanirlui:0 and:cview] ;
-
+    //    Scanui* scanui = [[Scanui alloc] init];
+    //    [scanui viewDidLoad];
+    //    UIView* cview = [self webView];
+    //
+    //    [scanui scanirlui:0 and:cview] ;
+    
     
     //[scanui scanirlui:0] ;
- //   NSString* name = [[command arguments] objectAtIndex:0];
-//    NSString* msg = [NSString stringWithFormat: @"Hello, %@", name];
-//
-//    CDVPluginResult* result = [CDVPluginResult
-//                               resultWithStatus:CDVCommandStatus_OK
-//                               messageAsString:msg];
-//
-//    [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+    //   NSString* name = [[command arguments] objectAtIndex:0];
+    //    NSString* msg = [NSString stringWithFormat: @"Hello, %@", name];
+    //
+    //    CDVPluginResult* result = [CDVPluginResult
+    //                               resultWithStatus:CDVCommandStatus_OK
+    //                               messageAsString:msg];
+    //
+    //    [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
     
-//    IRLScannerViewController *scanner = [IRLScannerViewController standardCameraViewWithDelegate:self];
-//    scanner.showControls = YES;
-//    scanner.showAutoFocusWhiteRectangle = YES;
-//    [self presentViewController:scanner animated:YES completion:nil];
+    //    IRLScannerViewController *scanner = [IRLScannerViewController standardCameraViewWithDelegate:self];
+    //    scanner.showControls = YES;
+    //    scanner.showAutoFocusWhiteRectangle = YES;
+    //    [self presentViewController:scanner animated:YES completion:nil];
     
 }
 
+
+
 -(void)pageSnapped:(UIImage *)page_image from:(UIViewController *)controller {
     //NSLog(@"%s","Page Snapped....");
+    
     [controller dismissViewControllerAnimated:YES completion:^{
         
         // [self.scannedImage setImage:page_image];
@@ -50,7 +67,10 @@
         NSData *pngData = UIImagePNGRepresentation(page_image);
         NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
         NSString *documentsPath = [paths objectAtIndex:0]; //Get the docs directory
-        NSString *filePath = [documentsPath stringByAppendingPathComponent:@"image.png"]; //Add the file name
+        NSString *fileName = [[_commandglo arguments] objectAtIndex:1];
+        NSString *fileType = @"png";
+        NSString *completeFileName = [NSString stringWithFormat:@"%@.%@", fileName, fileType];
+        NSString *filePath = [documentsPath stringByAppendingPathComponent:completeFileName]; //Add the file name
         [pngData writeToFile:filePath atomically:YES]; //Write the file
         //NSLog(@"%s","Page Snapped.222...");
         
@@ -58,21 +78,21 @@
         
         
         
-//        UIImage *viewImage = page_image; // --- mine was made from drawing context
-//        ALAssetsLibrary *library = [[ALAssetsLibrary alloc] init];
-//        // Request to save the image to camera roll
-//        [library writeImageToSavedPhotosAlbum:[viewImage CGImage] orientation:(ALAssetOrientation)[viewImage imageOrientation] completionBlock:^(NSURL *assetURL, NSError *error){
-//            if (error) {
-//                NSLog(@"error");
-//            } else {
-//                NSLog(@"url %@", assetURL);
-//            }
-//        }];
-//        [library release];
-        
-        ////////////////////
-        
-        
+        //        UIImage *viewImage = page_image; // --- mine was made from drawing context
+        //        ALAssetsLibrary *library = [[ALAssetsLibrary alloc] init];
+        //        // Request to save the image to camera roll
+        //        [library writeImageToSavedPhotosAlbum:[viewImage CGImage] orientation:(ALAssetOrientation)[viewImage imageOrientation] completionBlock:^(NSURL *assetURL, NSError *error){
+        //            if (error) {
+        //                NSLog(@"error");
+        //            } else {
+        //                NSLog(@"url %@", assetURL);
+        //            }
+        //        }];
+        //        [library release];
+
+
+
+
         // NSString* name = [[_commandglo arguments] objectAtIndex:0];
         // NSString* msg = [NSString stringWithFormat: @"Hello, %@", name];
         //
@@ -123,5 +143,13 @@
     UIViewController *presentedViewController = (UIViewController *)rootViewController.presentedViewController;
     return [self topViewController:presentedViewController];
 }
+
+//-(void)viewDidAppear:(BOOL)animated{
+//
+//    [[UIDevice currentDevice] setValue:
+//     [NSNumber numberWithInteger: UIInterfaceOrientationLandscapeLeft]
+//                                forKey:@"orientation"];
+//    
+//}
 
 @end

@@ -1,7 +1,7 @@
 //
 //  TOCropViewController.h
 //
-//  Copyright 2015-2017 Timothy Oliver. All rights reserved.
+//  Copyright 2015-2018 Timothy Oliver. All rights reserved.
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to
@@ -22,28 +22,9 @@
 
 #import <UIKit/UIKit.h>
 
+#import "TOCropViewConstants.h"
 #import "TOCropView.h"
 #import "TOCropToolbar.h"
-
-/* Preset values of the most common aspect ratios that can be used to quickly configure
-   the crop view controller. */
-typedef NS_ENUM(NSInteger, TOCropViewControllerAspectRatioPreset) {
-    TOCropViewControllerAspectRatioPresetOriginal,
-    TOCropViewControllerAspectRatioPresetSquare,
-    TOCropViewControllerAspectRatioPreset3x2,
-    TOCropViewControllerAspectRatioPreset5x3,
-    TOCropViewControllerAspectRatioPreset4x3,
-    TOCropViewControllerAspectRatioPreset5x4,
-    TOCropViewControllerAspectRatioPreset7x5,
-    TOCropViewControllerAspectRatioPreset16x9,
-    TOCropViewControllerAspectRatioPresetCustom
-};
-
-/* Whether the control toolbar is placed at the bottom or the top */
-typedef NS_ENUM(NSInteger, TOCropViewControllerToolbarPosition) {
-    TOCropViewControllerToolbarPositionBottom,
-    TOCropViewControllerToolbarPositionTop
-};
 
 @class TOCropViewController;
 
@@ -61,7 +42,9 @@ typedef NS_ENUM(NSInteger, TOCropViewControllerToolbarPosition) {
  @param cropRect A rectangle indicating the crop region of the image the user chose (In the original image's local co-ordinate space)
  @param angle The angle of the image when it was cropped
  */
-- (void)cropViewController:(nonnull TOCropViewController *)cropViewController didCropImageToRect:(CGRect)cropRect angle:(NSInteger)angle NS_SWIFT_NAME(cropViewController(_:didCropImageToRect:angle:));
+- (void)cropViewController:(nonnull TOCropViewController *)cropViewController
+        didCropImageToRect:(CGRect)cropRect
+                     angle:(NSInteger)angle;
 
 /**
  Called when the user has committed the crop action, and provides 
@@ -71,7 +54,9 @@ typedef NS_ENUM(NSInteger, TOCropViewControllerToolbarPosition) {
  @param cropRect A rectangle indicating the crop region of the image the user chose (In the original image's local co-ordinate space)
  @param angle The angle of the image when it was cropped
  */
-- (void)cropViewController:(nonnull TOCropViewController *)cropViewController didCropToImage:(nonnull UIImage *)image withRect:(CGRect)cropRect angle:(NSInteger)angle NS_SWIFT_NAME(cropViewController(_:didCropToImage:rect:angle:));
+- (void)cropViewController:(nonnull TOCropViewController *)cropViewController
+            didCropToImage:(nonnull UIImage *)image withRect:(CGRect)cropRect
+                     angle:(NSInteger)angle;
 
 /**
  If the cropping style is set to circular, implementing this delegate will return a circle-cropped version of the selected
@@ -81,7 +66,9 @@ typedef NS_ENUM(NSInteger, TOCropViewControllerToolbarPosition) {
  @param cropRect A rectangle indicating the crop region of the image the user chose (In the original image's local co-ordinate space)
  @param angle The angle of the image when it was cropped
  */
-- (void)cropViewController:(nonnull TOCropViewController *)cropViewController didCropToCircularImage:(nonnull UIImage *)image withRect:(CGRect)cropRect angle:(NSInteger)angle NS_SWIFT_NAME(cropViewController(_:didCropToCircleImage:rect:angle:));
+- (void)cropViewController:(nonnull TOCropViewController *)cropViewController
+    didCropToCircularImage:(nonnull UIImage *)image withRect:(CGRect)cropRect
+                     angle:(NSInteger)angle;
 
 /**
  If implemented, when the user hits cancel, or completes a 
@@ -91,7 +78,8 @@ typedef NS_ENUM(NSInteger, TOCropViewControllerToolbarPosition) {
  @param cancelled Whether a cropping action was actually performed, or if the user explicitly hit 'Cancel'
  
  */
-- (void)cropViewController:(nonnull TOCropViewController *)cropViewController didFinishCancelled:(BOOL)cancelled NS_SWIFT_NAME(cropViewController(_:didFinishCancelled:));
+- (void)cropViewController:(nonnull TOCropViewController *)cropViewController
+        didFinishCancelled:(BOOL)cancelled;
 
 @end
 
@@ -101,6 +89,11 @@ typedef NS_ENUM(NSInteger, TOCropViewControllerToolbarPosition) {
  The original, uncropped image that was passed to this controller.
  */
 @property (nonnull, nonatomic, readonly) UIImage *image;
+
+/**
+ The minimum croping aspect ratio. If set, user is prevented from setting cropping rectangle to lower aspect ratio than defined by the parameter.
+ */
+@property (nonatomic, assign) CGFloat minimumAspectRatio;
 
 /**
  The view controller's delegate that will receive the resulting
@@ -159,6 +152,12 @@ typedef NS_ENUM(NSInteger, TOCropViewControllerToolbarPosition) {
 @property (nonatomic, assign) CGSize customAspectRatio;
 
 /**
+ If this is set alongside `customAspectRatio`, the custom aspect ratio
+ will be shown as a selectable choice in the list of aspect ratios. (Default is `nil`)
+ */
+@property (nullable, nonatomic, copy) NSString *customAspectRatioName;
+
+/**
  Title label which can be used to show instruction on the top of the crop view controller
  */
 @property (nullable, nonatomic, readonly) UILabel *titleLabel;
@@ -174,6 +173,21 @@ typedef NS_ENUM(NSInteger, TOCropViewControllerToolbarPosition) {
  Setting this will override the Default which is a localized string for "Cancel".
  */
 @property (nullable, nonatomic, copy) NSString *cancelButtonTitle;
+
+/**
+ Shows a confirmation dialog when the user hits 'Cancel' and there are pending changes.
+ (Default is NO)
+ */
+@property (nonatomic, assign) BOOL showCancelConfirmationDialog;
+
+/**
+ If true, a custom aspect ratio is set, and the aspectRatioLockEnabled is set to YES, the crop box
+ will swap it's dimensions depending on portrait or landscape sized images.
+ This value also controls whether the dimensions can swap when the image is rotated.
+ 
+ Default is NO.
+ */
+@property (nonatomic, assign) BOOL aspectRatioLockDimensionSwapEnabled;
 
 /**
  If true, while it can still be resized, the crop box will be locked to its current aspect ratio.
@@ -209,6 +223,11 @@ typedef NS_ENUM(NSInteger, TOCropViewControllerToolbarPosition) {
  */
 @property (nonatomic, assign) BOOL rotateClockwiseButtonHidden;
 
+/*
+ If this controller is embedded in UINavigationController its navigation bar is hidden by default. Set this property to false to show the navigation bar. This must be set before this controller is presented.
+ */
+@property (nonatomic, assign) BOOL hidesNavigationBar;
+
 /**
  When enabled, hides the rotation button, as well as the alternative rotation 
  button visible when `showClockwiseRotationButton` is set to YES.
@@ -217,6 +236,12 @@ typedef NS_ENUM(NSInteger, TOCropViewControllerToolbarPosition) {
  */
 @property (nonatomic, assign) BOOL rotateButtonsHidden;
 
+/**
+ When enabled, hides the 'Reset' button on the toolbar.
+
+ Default is NO.
+ */
+@property (nonatomic, assign) BOOL resetButtonHidden;
 /**
  When enabled, hides the 'Aspect Ratio Picker' button on the toolbar.
  
@@ -244,6 +269,12 @@ typedef NS_ENUM(NSInteger, TOCropViewControllerToolbarPosition) {
  set activities that won't appear in the share sheet here.
  */
 @property (nullable, nonatomic, strong) NSArray<UIActivityType> *excludedActivityTypes;
+
+/**
+ An array of `TOCropViewControllerAspectRatioPreset` enum values denoting which
+ aspect ratios the crop view controller may display (Default is nil. All are shown)
+ */
+@property (nullable, nonatomic, strong) NSArray<NSNumber *> *allowedAspectRatios;
 
 /**
  When the user hits cancel, or completes a

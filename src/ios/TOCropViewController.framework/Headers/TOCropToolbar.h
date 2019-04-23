@@ -1,7 +1,7 @@
 //
 //  TOCropToolbar.h
 //
-//  Copyright 2015-2017 Timothy Oliver. All rights reserved.
+//  Copyright 2015-2018 Timothy Oliver. All rights reserved.
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to
@@ -21,6 +21,9 @@
 //  IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #import <UIKit/UIKit.h>
+#import "TOCropViewConstants.h"
+
+NS_ASSUME_NONNULL_BEGIN
 
 @interface TOCropToolbar : UIView
 
@@ -67,6 +70,7 @@
 @property (nonatomic, assign) BOOL clampButtonHidden;
 @property (nonatomic, assign) BOOL rotateCounterclockwiseButtonHidden;
 @property (nonatomic, assign) BOOL rotateClockwiseButtonHidden;
+@property (nonatomic, assign) BOOL resetButtonHidden;
 
 /* Enable the reset button */
 @property (nonatomic, assign) BOOL resetButtonEnabled;
@@ -74,5 +78,6 @@
 /* Done button frame for popover controllers */
 @property (nonatomic, readonly) CGRect doneButtonFrame;
 
-
 @end
+
+NS_ASSUME_NONNULL_END
