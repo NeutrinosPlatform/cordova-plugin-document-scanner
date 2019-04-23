@@ -42,10 +42,13 @@ The `scan.scanDoc` function opens the device's camera that allows users to snap 
 
 #### options
  - **sourceType** [Default value is 1]  :- When `sourceType` in options object is `1`(default) device camera opens so user can click a pic. When `0` gallery opens up so user can select an image.
-	 > `sourceType` only works for Android 
+	> **Platform Support** : Android only
+	> **Version Support** : 3.x.x & 4.x.x 
 	 
  - **fileName** [Default value is "image"] :- User can specify the name of the file with the file extension. File extension is always .png for now
-	> `fileName` only works for iOS. **Please cleanup the files if not using default value.**
+	> **Platform Support** : iOS only
+	> **Version Support** : 4.x.x only
+	> **Important Notes** : Please cleanup the files if not using default value.
 
 The return value is sent to the [`scanSuccess`](#module_scan.onSuccess) callback function, in fileUri format. You can do whatever you want with the URI, for example, render the image in an `<img>` tag.
 
@@ -145,18 +148,14 @@ Refer issue [10](https://github.com/NeutrinosPlatform/cordova-plugin-document-sc
 
 ## Credits / Native library links
 
-  
-
 Android :- [AndroidScanner](https://github.com/jhansireddy/AndroidScannerDemo) <br/>
 
 iOS [4.x.x] :- [IRLDocumentScanner](https://github.com/charlymr/IRLDocumentScanner) <br/>
 
 iOS [3.x.x] :- [WeScan](https://github.com/WeTransfer/WeScan)
   
-
 Huge thanks to these authors for making their document scanning native libraries public.
 
-  
 
 ## More about us!
 
