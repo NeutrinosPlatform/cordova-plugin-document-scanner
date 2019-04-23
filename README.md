@@ -1,9 +1,9 @@
 
 # cordova-plugin-document-scanner
 
->  *Note :- Please raise a pull request if there are fixes or enhancements that you want to add!*
+>  Please raise a pull request if there are fixes or enhancements that you want to add!
 
->  **DOCUMENTATION** This docs explains use of ver 3.x.x and ver 4.x.x. For 2.x.x and below please read the documentation within each of the npm releases.
+>  **DOCUMENTATION** - This doc explains use of ver 3.x.x and ver 4.x.x. For 2.x.x and below please read the documentation within each of the npm releases.
 
 This plugin defines a global `scan` object, which provides an API for scan the document from taking pictures and choosing image from the system's library.
 
@@ -42,26 +42,26 @@ The `scan.scanDoc` function opens the device's camera that allows users to snap 
 
 #### options
  - **sourceType** [Default value is 1]  :- When `sourceType` in options object is `1`(default) device camera opens so user can click a pic. When `0` gallery opens up so user can select an image.
-	> **Platform Support** : Android only
-	> **Version Support** : 3.x.x & 4.x.x 
+	- **Platform Support** : Android only
+	- **Version Support** : 3.x.x & 4.x.x 
 	 
  - **fileName** [Default value is "image"] :- User can specify the name of the file with the file extension. File extension is always .png for now
-	> **Platform Support** : iOS only
-	> **Version Support** : 4.x.x only
-	> **Important Notes** : Please cleanup the files if not using default value.
+	- **Platform Support** : iOS only
+	- **Version Support** : 4.x.x only
+	- **Important Notes** : Please cleanup the files if not using default value.
 
 The return value is sent to the [`scanSuccess`](#module_scan.onSuccess) callback function, in fileUri format. You can do whatever you want with the URI, for example, render the image in an `<img>` tag.
 
 > *Plugin adds file:// in front of the imageuri returned for both android and ios [iOS example imageURI returned :- file:///var/mobile/Containers/Data/Application/8376778A-983B-4FBA-B21C-A4CFDD047AAA/Documents/image.png]*
 
-__Supported Platforms__
+## Supported Platforms
 
 - Android
 
 - iOS
 
 
-**Example**
+## Example
 
 ```js
 
@@ -77,18 +77,20 @@ scan.scanDoc(scanSuccess, scanError, options);
 }
 ```
 
-## `scan.scanDoc`
+**working example**
 
 
 Take a photo and retrieve the image's file location:
 ```
-    scan.scanDoc(onSuccess, onFail, {sourceType:1, fileName:"myfilename"}); // sourceType will by default take value 1 if no value is set | 0 for gallery | 1 for camera
+    scan.scanDoc(onSuccess, onFail, {sourceType:1, fileName:"myfilename"}); 
+    // sourceType will by default take value 1 if no value is set | 0 for gallery | 1 for camera. 
+    // fileName will take default value "image" if no value set. Supported only on 4.x.x plugin version
 
     function onSuccess(imageURI) {
         alert(imageURI);
         console.log(imageURI);
         //var image = document.getElementById('myImage');
-        //image.src = imageURI; // For iOS, use image.src = imageURI + '?' + Date.now(); to solve issue 10
+        //image.src = imageURI; // For iOS, use image.src = imageURI + '?' + Date.now(); to solve issue 10 if unique fileName is not set.
 
     }
 
@@ -96,7 +98,7 @@ Take a photo and retrieve the image's file location:
         alert('Failed because: ' + message);
     }
 ```
-> Options need not be passed in if the default values are being used.
+> Options need not be passed in, if the default values are being used.
 
 ## iOS Quirks
 
