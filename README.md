@@ -45,7 +45,7 @@ The `scan.scanDoc` function opens the device's camera that allows users to snap 
 	- **Platform Support** : Android only
 	- **Version Support** : 3.x.x & 4.x.x 
 	 
- - **fileName** [Default value is "image"] :- User can specify the name of the file with the file extension. File extension is always .png for now
+ - **fileName** [Default value is "image"] :- User can specify the name of the file without the file extension. File extension is always .png for now
 	- **Platform Support** : iOS only
 	- **Version Support** : 4.x.x only
 	- **Important Notes** : Please cleanup the files if not using default value.
