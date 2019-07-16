@@ -32,7 +32,7 @@ var uri = "";
     }
     
     func imageScannerController(_ scanner: ImageScannerController, didFinishScanningWithResults results: ImageScannerResults) {
-        if(saveImage(image: results.scannedImage)) {
+        if(saveImage(image: results.doesUserPreferEnhancedImage ? (results.enhancedImage ?? results.scannedImage) : results.scannedImage)) {
             let pluginResult = CDVPluginResult(status: CDVCommandStatus_OK, messageAs: uri);
             commandDelegate.send(pluginResult, callbackId:com.callbackId);
         }
