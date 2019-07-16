@@ -18,18 +18,18 @@ This requires cordova 7.1.0+ and cordova android 6.4.0+ <br/>
 npm link :- https://www.npmjs.com/package/cordova-plugin-document-scanner
 
  - Add the 3.x.x version of the plugin
-```
+```sh
     cordova plugin add cordova-plugin-document-scanner@3.x.x
 ```
 
  - Set these mandatory configuration values in your projects config.xml
-```
+```xml
 <preference name="UseSwiftLanguageVersion" value="4.2" />
 <preference name="deployment-target" value="10" />
 ```
 
  - Go inside your platforms/ios folder then on the cli do
- ```
+ ```sh
  pod install
  ```
 *Please read issues and fixes section of readme for Ionic & PhoneGap installation*    
