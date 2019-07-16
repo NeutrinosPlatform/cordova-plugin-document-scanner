@@ -17,8 +17,21 @@ Although the object is attached to the global scoped `window`, it is not availab
 This requires cordova 7.1.0+ and cordova android 6.4.0+ <br/>
 npm link :- https://www.npmjs.com/package/cordova-plugin-document-scanner
 
-    cordova plugin add cordova-plugin-document-scanner
-    
+ - Add the 3.x.x version of the plugin
+```
+    cordova plugin add cordova-plugin-document-scanner@3.x.x
+```
+
+ - Set these mandatory configuration values in your projects config.xml
+```
+<preference name="UseSwiftLanguageVersion" value="4.2" />
+<preference name="deployment-target" value="10" />
+```
+
+ - Go inside your platforms/ios folder then on the cli do
+ ```
+ pod install
+ ```
 *Please read issues and fixes section of readme for Ionic & PhoneGap installation*    
 
 ### scan.scanDoc(sourceType, successCallback, errorCallback)
@@ -57,23 +70,6 @@ scan.scanDoc(sourceType, scanSuccess, scanError);
 
 Take a photo and retrieve the image's file location:
 
-    > versions 2.x.x
-    ```
-    scan.scanDoc(0, onSuccess, onFail);
-
-    function onSuccess(imageURI) {
-        alert(imageURI);
-        console.log(imageURI);
-        //var image = document.getElementById('myImage');
-        //image.src = imageURI; // For iOS, use image.src = imageURI + '?' + Date.now(); to solve issue 10
-
-    }
-
-    function onFail(message) {
-        alert('Failed because: ' + message);
-    }
-    ```
-
     > version 3.x.x example below | Please follow the ios Quirks steps below to get the build to succeed
     ```
     scan.scanDoc(onSuccess, onFail, {sourceType:1}); // sourceType will by default take value 1 if no value is set | 0 for gallery | 1 for camera
@@ -99,7 +95,7 @@ An example file URI obtained from success call back of scanDoc function looks li
 > for version 3.x.x also keep the following in mind
 > - Open xcworkspace file using xcode within the platforms/ios folder. 
 > - Select the project, this opens up project settings. Now within General set deployment target in xcode as 10 or above
-> - In build settings set swift language version to 4.0
+> - In build settings set swift language version to 4.2
 > - In build settings set Objective C bridging header to HelloCordova/Plugins/cordova-plugin-document-scanner/ScanPlugin/Bridging-Header.h where HelloCordova is your project name
 
 ## Issues and Fixes
