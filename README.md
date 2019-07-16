@@ -70,7 +70,7 @@ scan.scanDoc(sourceType, scanSuccess, scanError);
 
 Take a photo and retrieve the image's file location:
 
-    > version 3.x.x example below | Please follow the ios Quirks steps below to get the build to succeed
+    > version 3.x.x example below | Follow the ios Quirks steps below if you get build errors
     ```
     scan.scanDoc(onSuccess, onFail, {sourceType:1}); // sourceType will by default take value 1 if no value is set | 0 for gallery | 1 for camera
 
