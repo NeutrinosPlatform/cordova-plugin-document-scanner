@@ -19,7 +19,7 @@ npm link :- https://www.npmjs.com/package/cordova-plugin-document-scanner
 
  - Add the 3.x.x version of the plugin
 ```sh
-    cordova plugin add cordova-plugin-document-scanner@3.x.x
+cordova plugin add cordova-plugin-document-scanner@3.x.x
 ```
 
  - Set these mandatory configuration values in your projects config.xml
