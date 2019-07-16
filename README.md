@@ -28,7 +28,7 @@ cordova plugin add cordova-plugin-document-scanner@3.x.x
 <preference name="deployment-target" value="10" />
 ```
 
- - Go inside your platforms/ios folder then on the cli do
+ - Go inside your platforms/ios folder (You will see a file named Podfile here) then on the cli do
  ```sh
  pod install
  ```
