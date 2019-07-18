@@ -23,6 +23,7 @@ public class Scan extends CordovaPlugin {
     private static final int CAMERA = 1; // Take picture from camera
 
     private int srcType;
+    private int quality;
 
     public CallbackContext callbackContext;
 
@@ -41,7 +42,9 @@ public class Scan extends CordovaPlugin {
             this.srcType = CAMERA;
 
             //Take the values from the arguments if they're not already defined (this is tricky)
-            this.srcType = args.getInt(0);
+            //[sourceType, fileName, quality]
+            this.srcType = args.getInt(0); 
+            this.quality = args.getInt(2);
 
             this.callbackContext = callbackContext;
 
@@ -56,6 +59,7 @@ public class Scan extends CordovaPlugin {
                 }
                 Intent intent = new Intent(cordova.getActivity().getApplicationContext(), ScanActivity.class);
                 intent.putExtra(ScanConstants.OPEN_INTENT_PREFERENCE, preference);
+                intent.putExtra("quality", this.quality);
                 cordova.getActivity().startActivityForResult(intent, REQUEST_CODE);
             } catch (IllegalArgumentException e) {
                 this.callbackContext.error("Illegal Argument Exception");
