@@ -4,7 +4,7 @@ module.exports = {
         options = options || {};
 		options.sourceType = (options.sourceType == undefined) ? 1 : options.sourceType;
 		options.fileName = (options.fileName == undefined) ? "image" : options.fileName;
-		options.quality = (!isNaN(options.quality) && options.quality >= 0) ? options.quality : 1;
+		options.quality = (!isNaN(options.quality) && options.quality >= 1) ? options.quality : 1;
     	if((options.sourceType === 1 || options.sourceType === 0) && typeof options.fileName === "string")
     	{
 			var sourceType = options.sourceType;	// 0 Gallery, 1 Camera
