@@ -66,7 +66,7 @@
         // [self.scannedImage setImage:page_image];
         NSDecimalNumber *quality = [[_commandglo arguments] objectAtIndex:2];
         CGFloat floatQuality = [quality floatValue];
-        floatQuality = 1 - (floatQuality - 1)/9; // 1 - 1(quality - 1)/(max - 1)
+        floatQuality = 1 - (floatQuality - 1)/4; // 1 - 1(quality - 1)/(max - 1)
         NSData *pngData = UIImageJPEGRepresentation(page_image,floatQuality);
         NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
         NSString *documentsPath = [paths objectAtIndex:0]; //Get the docs directory
