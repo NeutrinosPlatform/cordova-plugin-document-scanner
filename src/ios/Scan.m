@@ -10,6 +10,7 @@
     _commandglo = command;
     NSString* sourceType = [[_commandglo arguments] objectAtIndex:0];
     NSString* fileName = [[_commandglo arguments] objectAtIndex:1];
+    NSDecimalNumber *quality = [[_commandglo arguments] objectAtIndex:2];
     
     //NSLog(@"%s","I AM HERE AT THE STAAAAAART!!!");
     //NSLog(@"%@",name);
@@ -63,12 +64,14 @@
     [controller dismissViewControllerAnimated:YES completion:^{
         
         // [self.scannedImage setImage:page_image];
-        
-        NSData *pngData = UIImagePNGRepresentation(page_image);
+        NSDecimalNumber *quality = [[_commandglo arguments] objectAtIndex:2];
+        CGFloat floatQuality = [quality floatValue];
+        floatQuality = 1 - (floatQuality - 1)/9; // 1 - 1(quality - 1)/(max - 1)
+        NSData *pngData = UIImageJPEGRepresentation(page_image,floatQuality);
         NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
         NSString *documentsPath = [paths objectAtIndex:0]; //Get the docs directory
         NSString *fileName = [[_commandglo arguments] objectAtIndex:1];
-        NSString *fileType = @"png";
+        NSString *fileType = @"jpg";
         NSString *completeFileName = [NSString stringWithFormat:@"%@.%@", fileName, fileType];
         NSString *filePath = [documentsPath stringByAppendingPathComponent:completeFileName]; //Add the file name
         [pngData writeToFile:filePath atomically:YES]; //Write the file
