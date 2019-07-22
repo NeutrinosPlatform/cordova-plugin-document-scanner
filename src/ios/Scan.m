@@ -28,14 +28,14 @@
         NSDecimalNumber *quality = [[_commandglo arguments] objectAtIndex:2];
         CGFloat floatQuality = [quality floatValue];
         floatQuality = 1 - (floatQuality - 1)/4; // 1 - 1(quality - 1)/(max - 1)
-        NSData *pngData = UIImageJPEGRepresentation(page_image,floatQuality);
+        NSData *imgData = UIImageJPEGRepresentation(page_image,floatQuality);
         NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
         NSString *documentsPath = [paths objectAtIndex:0]; //Get the docs directory
         NSString *fileName = [[_commandglo arguments] objectAtIndex:1];
         NSString *fileType = @"jpg";
         NSString *completeFileName = [NSString stringWithFormat:@"%@.%@", fileName, fileType];
         NSString *filePath = [documentsPath stringByAppendingPathComponent:completeFileName]; //Add the file name
-        [pngData writeToFile:filePath atomically:YES]; //Write the file
+        [imgData writeToFile:filePath atomically:YES]; //Write the file
         
         // One line code to save to photo library , but no way to obtain the file path //UIImageWriteToSavedPhotosAlbum(page_image, nil, nil, nil);
 
