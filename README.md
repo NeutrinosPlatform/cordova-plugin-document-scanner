@@ -50,7 +50,7 @@ The `scan.scanDoc` function opens the device's camera that allows users to snap 
 	- **Version Support** : 4.x.x only
 	- **Important Notes** : Please cleanup the files if not using default value.
 
- - **quality** [Default value is 1]  :- `quality` in options object can take float values values from `1.0`(default - Highest quality) to `5.0`(Lowest Quality). Any value not equal to or not between these values will be default to the highest quality of `1.0`.
+ - **quality** [Default value is 1]  :- `quality` in options object can take float values values from `1.0`(default - Highest quality) to `5.0`(Lowest Quality). Any value not equal to or not between these values will default to the highest quality of `1.0`.
 	- **Platform Support** : Android and iOS
 	- **Version Support** : >= 4.1.0 
     - **Important Notes** : Android subsamples to change quality while iOS does JPEG compression to change quality so there might be small changes in quality between devices. 
