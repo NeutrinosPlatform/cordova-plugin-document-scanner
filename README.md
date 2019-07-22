@@ -105,7 +105,9 @@ Take a photo and retrieve the image's file location. Options need not be passed 
         alert(imageData);
         console.log(imageData);
         //var image = document.getElementById('myImage');
-        //image.src = imageData; // For iOS, use image.src = imageData + '?' + Date.now(); to solve issue 10 if unique fileName is not set.
+        //image.src = imageData; // Image URL rendering. 
+	//image.src = imageData + '?' + Date.now(); // For iOS, use this to solve issue 10 if unique fileName is not set.
+	//image.src = "data:image/jpeg;base64," + imageData; // Base64 rendering
     }
 
     function errorCallback(message) {
