@@ -9,12 +9,19 @@ import org.json.JSONException;
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.os.StrictMode;
+import android.util.Base64;
 
 import com.scanlibrary.ScanActivity;
 import com.scanlibrary.ScanConstants;
+
+import java.io.ByteArrayOutputStream;
+import java.net.URL;
 
 public class Scan extends CordovaPlugin {
 
@@ -24,6 +31,7 @@ public class Scan extends CordovaPlugin {
 
     private int srcType;
     private int quality;
+    private boolean returnBase64;
 
     public CallbackContext callbackContext;
 
@@ -42,10 +50,10 @@ public class Scan extends CordovaPlugin {
             this.srcType = CAMERA;
 
             //Take the values from the arguments if they're not already defined (this is tricky)
-            //[sourceType, fileName, quality]
+            //[sourceType, fileName, quality, retBase64]
             this.srcType = args.getInt(0); 
             this.quality = args.getInt(2);
-
+            this.returnBase64 = args.getBoolean(3);
             this.callbackContext = callbackContext;
 
             cordova.setActivityResultCallback(this);
@@ -82,11 +90,39 @@ public class Scan extends CordovaPlugin {
         if (requestCode == REQUEST_CODE && resultCode == cordova.getActivity().RESULT_OK) {
             Uri uri = data.getExtras().getParcelable(ScanConstants.SCANNED_RESULT);
             if (uri != null) {
-                String fileLocation = FileHelper.getRealPath(uri, this.cordova);
-                this.callbackContext.success("file://" + fileLocation);
+                String fileLocation = "file://" + FileHelper.getRealPath(uri, this.cordova);
+                if(returnBase64) {
+                    this.callbackContext.success(convertUrlToBase64(fileLocation));
+                } else {
+                    this.callbackContext.success(fileLocation);
+                }
             } else {
                 this.callbackContext.error("null data from scan libary");
             }
         }
+    }
+
+    /**
+     *
+     * @param url - web url
+     * @return - Base64 String
+     * Method used to Convert URL to Base64 String
+     */
+    public String convertUrlToBase64(String url) {
+        URL newurl;
+        Bitmap bitmap;
+        String base64 = "";
+        try {
+            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+            StrictMode.setThreadPolicy(policy);
+            newurl = new URL(url);
+            bitmap = BitmapFactory.decodeStream(newurl.openConnection().getInputStream());
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
+            base64 = Base64.encodeToString(outputStream.toByteArray(), Base64.DEFAULT);
+        } catch (Exception e) {
+            this.callbackContext.error(e.getMessage());
+        }
+        return base64;
     }
 }
