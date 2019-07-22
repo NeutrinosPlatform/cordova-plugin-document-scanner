@@ -78,8 +78,8 @@ scan.scanDoc(scanSuccess, scanError, options);
 ```js
 {
 	sourceType : 1,
-    fileName : "myfile",
-    quality : 2.5
+    	fileName : "myfile",
+    	quality : 2.5
 }
 ```
 
