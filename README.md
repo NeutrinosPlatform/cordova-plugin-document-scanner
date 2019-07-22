@@ -45,14 +45,19 @@ The `scan.scanDoc` function opens the device's camera that allows users to snap 
 	- **Platform Support** : Android only
 	- **Version Support** : 3.x.x & 4.x.x 
 	 
- - **fileName** [Default value is "image"] :- User can specify the name of the file without the file extension. File extension is always .png for now
+ - **fileName** [Default value is "image"] :- User can specify the name of the file without the file extension. File extension is always .jpg for now
 	- **Platform Support** : iOS only
 	- **Version Support** : 4.x.x only
 	- **Important Notes** : Please cleanup the files if not using default value.
 
+ - **quality** [Default value is 1]  :- `quality` in options object can take float values values from `1.0`(default - Highest quality) to `5.0`(Lowest Quality). Any value not equal to or between these values will be default to the highest quality of `1.0`.
+	- **Platform Support** : Android and iOS
+	- **Version Support** : >= 4.1.0 
+    - **Important Notes** : Android subsamples to change quality while iOS does JPEG compression to change quality so there might be small changes in quality between devices. 
+	 
 The return value is sent to the [`scanSuccess`](#module_scan.onSuccess) callback function, in fileUri format. You can do whatever you want with the URI, for example, render the image in an `<img>` tag.
 
-> *Plugin adds file:// in front of the imageuri returned for both android and ios [iOS example imageURI returned :- file:///var/mobile/Containers/Data/Application/8376778A-983B-4FBA-B21C-A4CFDD047AAA/Documents/image.png]*
+> *Plugin adds file:// in front of the imageuri returned for both android and ios [iOS example imageURI returned :- file:///var/mobile/Containers/Data/Application/8376778A-983B-4FBA-B21C-A4CFDD047AAA/Documents/image.jpg]*
 
 ## Supported Platforms
 
@@ -73,7 +78,8 @@ scan.scanDoc(scanSuccess, scanError, options);
 ```js
 {
 	sourceType : 1,
-	fileName : "myfile"
+    fileName : "myfile",
+    quality : 2.5
 }
 ```
 
@@ -82,7 +88,7 @@ scan.scanDoc(scanSuccess, scanError, options);
 
 Take a photo and retrieve the image's file location:
 ```
-    scan.scanDoc(onSuccess, onFail, {sourceType:1, fileName:"myfilename"}); 
+    scan.scanDoc(onSuccess, onFail, {sourceType : 1, fileName : "myfilename", quality : 1.0}); 
     // sourceType will by default take value 1 if no value is set | 0 for gallery | 1 for camera. 
     // fileName will take default value "image" if no value set. Supported only on 4.x.x plugin version
 
@@ -106,12 +112,12 @@ Take a photo and retrieve the image's file location:
 
 - Please don't forget to delete the files if you use the `fileName` option to create your own filenames.
 
- - An example file URI obtained from success call back of scanDoc function looks like this file:///var/mobile/Containers/Data/Application/8376778A-983B-4FBA-B21C-A4CFDD047AAA/Documents/image.png
+- An example file URI obtained from success call back of scanDoc function looks like this file:///var/mobile/Containers/Data/Application/8376778A-983B-4FBA-B21C-A4CFDD047AAA/Documents/image.jpg
 
 
 ## Android Quirks
 
-NOTE :- Android allows delete of files from the file manager. In iOS this is not possible hence the use of `fileName`. Android won't accept the file name parameter in options.
+NOTE :- Android allows delete of files from the file manager. In iOS this is not possible hence the use of `fileName`. Android will ignore the file name parameter in options.
 
 
 ## Issues and Fixes
@@ -147,6 +153,10 @@ Refer entire issue [10](https://github.com/NeutrinosPlatform/cordova-plugin-docu
 - Multiple scans don't override the first image | Browser caching issue <br/>
 
 Refer issue [10](https://github.com/NeutrinosPlatform/cordova-plugin-document-scanner/issues/10) <br/>
+
+- If you are using WKWebView for iOS please follow the workaround in the following issue. <br/>
+
+Refer issue [56](https://github.com/NeutrinosPlatform/cordova-plugin-document-scanner/issues/56) <br/>
 
 ## Credits / Native library links
 

@@ -1,2 +1,5 @@
 .gradle
 .DS_Store
+src/android/.project
+.vscode/settings.json
+src/android/.settings/org.eclipse.buildship.core.prefs
