@@ -50,7 +50,7 @@ public class Scan extends CordovaPlugin {
             this.srcType = CAMERA;
 
             //Take the values from the arguments if they're not already defined (this is tricky)
-            //[sourceType, fileName, quality, retBase64]
+            //[sourceType, fileName, quality, returnBase64]
             this.srcType = args.getInt(0); 
             this.quality = args.getInt(2);
             this.returnBase64 = args.getBoolean(3);
