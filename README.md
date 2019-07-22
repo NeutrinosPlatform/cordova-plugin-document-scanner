@@ -77,9 +77,9 @@ scan.scanDoc(scanSuccess, scanError, options);
 **options example**
 ```js
 {
-	sourceType : 1,
-    	fileName : "myfile",
-    	quality : 2.5
+    sourceType : 1,
+    fileName : "myfile",
+    quality : 2.5
 }
 ```
 
