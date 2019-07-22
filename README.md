@@ -3,7 +3,7 @@
 
 >  **DOCUMENTATION** - This doc explains the use of plugin ver 4.x.x. For documentation of ver 3.x.x of the plugin, please see the branch [ver/3.x.x](https://github.com/NeutrinosPlatform/cordova-plugin-document-scanner/tree/ver/3.x.x) on github. For ver 2.x.x and below please read the documentation within each of the npm releases.
 
-This plugin defines a global `scan` object, which provides an API to scan the document using camera (iOS and Android) or by choosing an image from the system's photo library (Android).
+This plugin defines a global `scan` object, which provides an API to scan the document using camera (iOS and Android) or by choosing an image from the system's photo library (Android). The plugin does provide edge detection while scanning.
 
 Although the object is attached to the global scoped `window`, it is not available until after the `deviceready` event.
 
@@ -38,7 +38,8 @@ npm link :- https://www.npmjs.com/package/cordova-plugin-document-scanner
 # Usage
 
 `scan.scanDoc(successCallback, errorCallback, options)`
-Takes a photo using the scan plugin, or retrieve a photo from the device's image gallery. The image is passed to the document scanner and the scanned image is passed to success callback as the URI for the image file.
+
+Takes a photo using the scan plugin, or retrieves a photo from the device's image gallery. The image is passed to the document scanner and the scanned image is passed to success callback as the URI for the image file.
 
 The `scan.scanDoc` function opens the device's camera that allows users to snap pictures by default. Once the user snaps the photo, the scan application closes and the application is restored.
 
@@ -63,13 +64,13 @@ The `scan.scanDoc` function opens the device's camera that allows users to snap 
 	- **Version Support** : >= 4.1.0 
     - **Important Notes** : Android subsamples to change quality while iOS does JPEG compression to change quality so there might be small changes in quality between devices. 
 
- - **returnBase64** [Default value is false]  :- `returnBase64` in options object can take boolean values. If `true`, the plugin will return the scanned image as base64. If `false`, the plugin will return the image URL of the image. 
+ - **returnBase64** [Default value is false]  :- `returnBase64` in options object can only take boolean values. If `true`, the plugin will return the scanned image as base64. If `false`, the plugin will return the image URL of the image. 
 	- **Platform Support** : Android and iOS
 	- **Version Support** : >= 4.2.0 
     - **Important Notes** : Even though base64 is returned the image will still get saved in memory.
 
-> Plugin adds file:// in front of the imageuri returned for both android and ios. 
-**iOS example imageURI returned** :- file:///var/mobile/Containers/Data/Application/8376778A-983B-4FBA-B21C-A4CFDD047AAA/Documents/image.jpg 
+> Plugin adds file:// in front of the imageuri returned for both android and ios. <br/>
+**iOS example imageURI returned** :- file:///var/mobile/Containers/Data/Application/8376778A-983B-4FBA-B21C-A4CFDD047AAA/Documents/image.jpg <br/>
 **Android example imageURI returned** :- file:///storage/emulated/0/Pictures/1563790575755.jpg
 
 # Example
@@ -97,7 +98,7 @@ Take a photo and retrieve the image's file location. Options need not be passed 
     // sourceType will by default take value 1 if no value is set | 0 for gallery | 1 for camera. 
     // fileName will take default value "image" if no value set. Supported only on 4.x.x plugin version
     // quality will take default value 1.0 (highest). Lowest value is 5.0. Any value in between will be accepted
-    // returnBase64 will take default valur false, meaning image URL is returned. If true base64 is returned
+    // returnBase64 will take default boolean value false, meaning image URL is returned. If true base64 is returned
     function successCallback(imageURI) {
         alert(imageURI);
         console.log(imageURI);
