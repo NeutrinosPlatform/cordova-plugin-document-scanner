@@ -101,11 +101,11 @@ Take a photo and retrieve the image's file location. Options need not be passed 
     // fileName will take default value "image" if no value set. Supported only on 4.x.x plugin version
     // quality will take default value 1.0 (highest). Lowest value is 5.0. Any value in between will be accepted
     // returnBase64 will take default boolean value false, meaning image URL is returned. If true base64 is returned
-    function successCallback(imageURI) {
-        alert(imageURI);
-        console.log(imageURI);
+    function successCallback(imageData) {
+        alert(imageData);
+        console.log(imageData);
         //var image = document.getElementById('myImage');
-        //image.src = imageURI; // For iOS, use image.src = imageURI + '?' + Date.now(); to solve issue 10 if unique fileName is not set.
+        //image.src = imageData; // For iOS, use image.src = imageData + '?' + Date.now(); to solve issue 10 if unique fileName is not set.
     }
 
     function errorCallback(message) {
