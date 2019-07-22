@@ -87,7 +87,7 @@ scan.scanDoc(scanSuccess, scanError, options);
 
 
 Take a photo and retrieve the image's file location:
-```
+```js
     scan.scanDoc(onSuccess, onFail, {sourceType : 1, fileName : "myfilename", quality : 1.0}); 
     // sourceType will by default take value 1 if no value is set | 0 for gallery | 1 for camera. 
     // fileName will take default value "image" if no value set. Supported only on 4.x.x plugin version
