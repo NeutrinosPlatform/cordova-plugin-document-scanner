@@ -37,7 +37,9 @@ npm link :- https://www.npmjs.com/package/cordova-plugin-document-scanner
 
 # Usage
 
-`scan.scanDoc(successCallback, errorCallback, options)`
+```js
+scan.scanDoc(successCallback, errorCallback, options)
+```
 
 Takes a photo using the scan plugin, or retrieves a photo from the device's image gallery. The image is passed to the document scanner and the scanned image is passed to success callback as the URI for the image file.
 
