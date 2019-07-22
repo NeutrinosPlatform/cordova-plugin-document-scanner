@@ -23,7 +23,9 @@ function onDeviceReady() {
   
 # Installation
 
-`cordova plugin add cordova-plugin-document-scanner@4.x.x`
+```
+cordova plugin add cordova-plugin-document-scanner@4.x.x
+```
 
 > Plugin versions **2.x.x and below are now deprecated**. Please use 4.x.x for a stable releases and 3.x.x if you want to be able to use the WeScan Swift library. This requires cordova 7.1.0+ and cordova android 6.4.0+ <br/>
 
