@@ -71,7 +71,7 @@ The `scan.scanDoc` function opens the device's camera that allows users to snap 
  - **returnBase64** [Default value is false]  :- `returnBase64` in options object can only take boolean values. If `true`, the plugin will return the scanned image as base64. If `false`, the plugin will return the image URL of the image. 
 	- **Platform Support** : Android and iOS
 	- **Version Support** : >= 4.2.0 
-    - **Important Notes** : Even though base64 is returned the image will still get saved in memory.
+    - **Important Notes** : For Android even when base64 is returned the image will still get saved to memory. For iOS this isn't the case.
 
 > Plugin adds file:// in front of the imageuri returned for both android and ios. <br/>
 **iOS example imageURI returned** :- file:///var/mobile/Containers/Data/Application/8376778A-983B-4FBA-B21C-A4CFDD047AAA/Documents/image.jpg <br/>
