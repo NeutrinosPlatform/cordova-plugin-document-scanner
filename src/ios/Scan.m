@@ -33,7 +33,7 @@
         CGFloat floatQuality = [quality floatValue];
         floatQuality = 1 - (floatQuality - 1)/4; // 1 - 1(quality - 1)/(max - 1)
         NSData *imgData = UIImageJPEGRepresentation(page_image,floatQuality);
-        if(returnBase64) {
+        if([returnBase64 boolValue]) {
             CDVPluginResult* result = [CDVPluginResult
                                        resultWithStatus:CDVCommandStatus_OK
                                        messageAsString:[self base64forData:imgData]];
