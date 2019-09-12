@@ -119,7 +119,7 @@ public class Scan extends CordovaPlugin {
             bitmap = BitmapFactory.decodeStream(newurl.openConnection().getInputStream());
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
-            base64 = Base64.encodeToString(outputStream.toByteArray(), Base64.DEFAULT);
+            base64 = Base64.encodeToString(outputStream.toByteArray(), Base64.NO_WRAP);
         } catch (Exception e) {
             this.callbackContext.error(e.getMessage());
         }
