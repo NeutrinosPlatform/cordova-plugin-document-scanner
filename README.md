@@ -1,5 +1,5 @@
 
-# cordova-plugin-document-scanner
+# cordova-plugin-document-scanner [![npm version](https://badge.fury.io/js/cordova-plugin-document-scanner.svg)](//npmjs.com/package/cordova-plugin-document-scanner)
 
 >  **DOCUMENTATION** - This doc explains the use of plugin ver 4.x.x. For documentation of ver 3.x.x of the plugin, please see the branch [ver/3.x.x](https://github.com/NeutrinosPlatform/cordova-plugin-document-scanner/tree/ver/3.x.x) on github. For ver 2.x.x and below please read the documentation within each of the npm releases.
 
