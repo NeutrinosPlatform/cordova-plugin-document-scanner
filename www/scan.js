@@ -1,16 +1,23 @@
 
+var argscheck = require('cordova/argscheck'),
+	exec = require("cordova/exec");
+
 module.exports = {
     scanDoc: function (successCallback, errorCallback, options) {
+		function toInt(value) {
+			if (typeof value === "string") {
+				return parseInt(value);
+			}
+			return value;
+		}
+		argscheck.checkArgs('fFO', 'ClippingCamera.getPicture', arguments);
         options = options || {};
-		options.sourceType = (options.sourceType == undefined) ? 1 : options.sourceType;
-		options.fileName = (options.fileName == undefined) ? "image" : options.fileName;
+		options.sourceType = (options.sourceType !== 1) ? 0 : options.sourceType;
+		options.fileName = (typeof options.fileName === "string") ? options.fileName : "image";
 		options.quality = (!isNaN(options.quality) && options.quality >= 1 && options.quality <= 5) ? options.quality : 1;
 		options.returnBase64 = (typeof options.returnBase64 === "boolean") ? options.returnBase64 : false;
 
-		options.maxResolution = (typeof options.maxResolution === "string") ? toInt(options.maxResolution) : options.maxResolution;
-		options.autoShutter = (typeof options.autoShutter === "string") ? toInt(options.autoShutter) : options.autoShutter;
-		options.rotationDegree = (typeof options.rotationDegree === "string") ? toInt(options.rotationDegree) : options.rotationDegree;
-    	if((options.sourceType === 1 || options.sourceType === 0) && typeof options.fileName === "string")
+    	if(options.sourceType === 1 || options.sourceType === 0)
     	{
 			var sourceType = options.sourceType;	// 0 Gallery, 1 Camera
 			var fileName = options.fileName;	// "image" if not specified
@@ -25,7 +32,7 @@ module.exports = {
 
 			var args = [sourceType, fileName, quality, returnBase64, convertToGrayscale, dontClip, maxResolution, autoShutter, rotationDegree];
 
-        	cordova.exec(successCallback, errorCallback, "Scan", "scanDoc", args);
+        	exec(successCallback, errorCallback, "Scan", "scanDoc", args);
     	}
     	else
     	{

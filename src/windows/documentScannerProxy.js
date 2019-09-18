@@ -409,7 +409,7 @@ CameraUI.prototype.onFrameArrived = function() {
 /**
  * Starts capture asyncronously.
  *
- * @return  {Promise<ScanResult>}  barcode scan result or null if search
+ * @return  {Promise<CaptureResult>}  document capture result or null if search
  *   cancelled.
  */
 CameraUI.prototype.capturing = function () {
@@ -656,7 +656,9 @@ module.exports = {
 		}
         function getQuality() {
             return (CameraUI.openCameraCallArgs.args && CameraUI.openCameraCallArgs.args[2] ?
-            CameraUI.openCameraCallArgs.args && CameraUI.openCameraCallArgs.args[2] * 100 : 50);
+            CameraUI.openCameraCallArgs.args && CameraUI.openCameraCallArgs.args[2] ?
+            Math.floor((1.0 - (CameraUI.openCameraCallArgs.args[2] - 1.0) / 4.0) * 100.0)
+            : 100;
         }
         function getReturnBase64() {
             return CameraUI.openCameraCallArgs.args && CameraUI.openCameraCallArgs.args[3];
@@ -1477,4 +1479,4 @@ Windows.UI.WebUI.WebUIApplication.addEventListener("resuming", function () {
     }
 }, false);
 
-require("cordova/exec/proxy").add("scan", module.exports);
+require("cordova/exec/proxy").add("Scan", module.exports);
