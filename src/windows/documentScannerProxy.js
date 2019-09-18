@@ -467,10 +467,9 @@ CameraUI.prototype.capturePhoto = function (bDontClip, quality, fileName, return
             }
         }
         this.release();
-        var fileName = fileName + ".jpg";
         var tempFolder = getAppData().temporaryFolder;
+        var tempCapturedFile = null;
         return new WinJS.Promise(function (complete) {
-            var tempCapturedFile = null;
             var decoder = null;
             var outputBitmap = null;
             var encodingProperties = Windows.Media.MediaProperties.ImageEncodingProperties.createJpeg();
@@ -563,16 +562,18 @@ CameraUI.prototype.capturePhoto = function (bDontClip, quality, fileName, return
                 if (!capturedFile) {
                     complete(null);
                     return WinJS.Promise.as();
-                } else {
-                    return fileIO.readBufferAsync(capturedFile).done(function (buffer) {
+                } else if (returnBase64) {
+                    return fileIO.readBufferAsync(capturedFile).done(function(buffer) {
                         var strBase64 = encodeToBase64String(buffer);
-                        capturedFile.deleteAsync().done(function () {
+                        capturedFile.deleteAsync().done(function() {
                             complete(strBase64);
-                        },
-                        function (err) {
+                        }, function(err) {
                             fail(err);
                         });
                     }, fail);
+                } else {
+                    complete(tempCapturedFile && tempCapturedFile.path);
+                    return WinJS.Promise.as();
                 }
             }).then(function (result) {
                 that._captured = result;
@@ -652,7 +653,7 @@ module.exports = {
             return CameraUI.openCameraCallArgs.args && CameraUI.openCameraCallArgs.args[0];
 		}
         function getFileName() {
-            return CameraUI.openCameraCallArgs.args && CameraUI.openCameraCallArgs.args[1] || "image";
+            return (CameraUI.openCameraCallArgs.args && CameraUI.openCameraCallArgs.args[1] || "image") + ".jpg";
 		}
         function getQuality() {
             return CameraUI.openCameraCallArgs.args && CameraUI.openCameraCallArgs.args[2] ?
