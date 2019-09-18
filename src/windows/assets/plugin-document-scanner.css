@@ -1,0 +1,132 @@
+﻿.document-scanner-ui-wrap {
+    margin: 0;
+    padding: 0;
+    outline: 0;
+    font-size: 100%;
+    vertical-align: baseline;
+    background-color: black;
+    position: fixed;
+    display: block;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 9999999;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.document-scanner-ui-preview {
+    display: block;
+    position: absolute;
+}
+.document-scanner-ui-canvas {
+    display: block;
+    position: absolute;
+}
+
+.document-scanner-ui-app-bar {
+    height: 48px;
+    width: 100%;
+    padding-top: 4px;
+    z-index: 9999998;
+    text-align: center;
+    user-select: none;
+    display: block;
+    position: absolute;
+    bottom: 0px;
+    background-color: rgba(0,0,0,0.2);
+}
+
+.document-scanner-app-bar-action {
+    width: 40px;
+    height: 40px;
+    margin: 0 20px;
+    font-family: "Segoe UI Symbol";
+    color: white;
+    font-size: 32px;
+    text-align: center;
+    cursor: default;
+}
+
+.document-scanner-app-bar-action-bkg {
+    width: 80px;
+    height: 80px;
+    border-width: 40px;
+    border-radius: 40px;
+    background-color: rgba(0, 0, 0, 0.2);
+}
+
+.document-scanner-action-text {
+    display: block;
+    position: absolute;
+    width: 100%;
+    bottom: 20px;
+}
+
+.document-scanner-action-bkg {
+    display: none;
+    position: absolute;
+    right: 0;
+}
+.document-scanner-action-photo {
+    display: block;
+    position: absolute;
+    right: 0;
+}
+.document-scanner-action-close {
+    display: block;
+    position: absolute;
+    left: 0;
+}
+@media all and (orientation: landscape) {
+    /*
+    .document-scanner-app-bar-action {
+        float: right;
+    }
+    .document-scanner-action-close, .document-scanner-action-settings {
+        margin-top: 22px;
+    }
+    */
+}
+
+.document-scanner-action-close::before {
+    content: "\E0BA";
+    /* close icon is larger so we re-size it to fit other icons */
+}
+.document-scanner-action-close:hover::before {
+    content: "\E2A8";
+    color: gray;
+}
+
+.document-scanner-action-settings::before {
+    content: "\E15E";
+    /* close icon is larger so we re-size it to fit other icons */
+}
+.document-scanner-action-settings:hover::before {
+    content: "\E15E";
+    color: gray;
+}
+
+.document-scanner-action-photo::before {
+    content: "\E114";
+    /* close icon is larger so we re-size it to fit other icons */
+}
+.document-scanner-action-photo:hover::before {
+    content: "\E114";
+    color: gray;
+}
+
+.no-zoom {
+    -ms-content-zooming: none;
+}
+
+.no-scroll {
+    overflow: hidden;
+}
+
+@media (max-width:499px) {
+    .document-scanner-action-close {
+        display: none;
+    }
+}

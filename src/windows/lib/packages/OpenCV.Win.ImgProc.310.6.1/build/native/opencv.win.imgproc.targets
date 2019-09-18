@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <OpenCVWinImgProc-Platform Condition="'$(Platform)' == 'Win32'">x86</OpenCVWinImgProc-Platform>
+        <OpenCVWinImgProc-Platform Condition="'$(Platform)' != 'Win32'">$(Platform)</OpenCVWinImgProc-Platform>
+    </PropertyGroup>
+
+    <ItemGroup Condition="'$(TargetPlatformIdentifier)' == 'UAP'">
+        <ReferenceCopyLocalPaths Condition="'$(Configuration)' == 'Release'" Include="$(MSBuildThisFileDirectory)..\..\runtimes\win10-$(OpenCVWinImgProc-Platform)\native\opencv_imgproc310.dll" />
+        <ReferenceCopyLocalPaths Condition="'$(Configuration)' == 'Debug'"   Include="$(MSBuildThisFileDirectory)..\..\runtimes\win10-$(OpenCVWinImgProc-Platform)\native\opencv_imgproc310d.dll" />
+    </ItemGroup>
+<!--
+    <ItemGroup Condition="'$(TargetPlatformIdentifier)' == 'UAP'">
+        <Reference Include="$(MSBuildThisFileDirectory)..\..\lib\uap10.0\OpenCVWinImgProc.winmd">
+            <Implementation>OpenCVWinImgProc.dll</Implementation>
+        </Reference>
+        <ReferenceCopyLocalPaths Include="$(MSBuildThisFileDirectory)..\..\runtimes\win10-$(OpenCVWinImgProc-Platform)\native\OpenCVWinImgProc.dll" />
+    </ItemGroup>
+-->
+    <ItemDefinitionGroup Condition="'$(TargetPlatformIdentifier)' == 'UAP'">
+        <ClCompile>
+            <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+        </ClCompile>
+        <Link>
+            <AdditionalLibraryDirectories>$(MSBuildThisFileDirectory)win10-$(OpenCVWinImgProc-Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+            <AdditionalDependencies Condition="'$(Configuration)' == 'Release'">opencv_imgproc310.lib;%(AdditionalDependencies)</AdditionalDependencies>
+            <AdditionalDependencies Condition="'$(Configuration)' == 'Debug'">opencv_imgproc310d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+        </Link>
+    </ItemDefinitionGroup>
+
+</Project>
