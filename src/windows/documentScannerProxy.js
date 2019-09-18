@@ -655,8 +655,7 @@ module.exports = {
             return CameraUI.openCameraCallArgs.args && CameraUI.openCameraCallArgs.args[1] || "image";
 		}
         function getQuality() {
-            return (CameraUI.openCameraCallArgs.args && CameraUI.openCameraCallArgs.args[2] ?
-            CameraUI.openCameraCallArgs.args && CameraUI.openCameraCallArgs.args[2] ?
+            return CameraUI.openCameraCallArgs.args && CameraUI.openCameraCallArgs.args[2] ?
             Math.floor((1.0 - (CameraUI.openCameraCallArgs.args[2] - 1.0) / 4.0) * 100.0)
             : 100;
         }
