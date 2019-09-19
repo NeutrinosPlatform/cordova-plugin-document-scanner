@@ -25,6 +25,27 @@ var DEFAULT_ASPECT_RATIO = '1.8';
 // Highest possible z-index supported across browsers. Anything used above is converted to this value.
 var HIGHEST_POSSIBLE_Z_INDEX = 2147483647;
 
+var PROPERTY_QUALITY    "{698649BE-8EAE-4551-A4CB-2FA79A4E1E70}";
+var PROPERTY_GRAYSCALE  "{698649BE-8EAE-4551-A4CB-2FA79A4E1E71}";
+var PROPERTY_ROTATION   "{698649BE-8EAE-4551-A4CB-2FA79A4E1E72}";
+var PROPERTY_CAPTURE    "{698649BE-8EAE-4551-A4CB-2FA79A4E1E79}";
+var PROPERTY_RESULT     "{698649BE-8EAE-4551-A4CB-2FA79A4E1E80}"
+
+var analyticsVersionInfo = Windows.System.Profile.AnalyticsInfo && Windows.System.Profile.AnalyticsInfo.versionInfo;
+var getVersion = function() {
+    return analyticsVersionInfo && analyticsVersionInfo.deviceFamilyVersion;
+}
+var getMajorVersion = function() {
+	var majorVersion = 0;
+	if (analyticsVersionInfo && analyticsVersionInfo.deviceFamilyVersion) {
+		var pos = analyticsVersionInfo.deviceFamilyVersion.indexOf('.');
+		if (pos < 0) {
+			pos = analyticsVersionInfo.deviceFamilyVersion.length;
+		}
+		majorVersion = parseInt(analyticsVersionInfo.deviceFamilyVersion.substr(0,pos);
+	}
+	return majorVersion;
+}
 var getAppData = function () {
     return Windows.Storage.ApplicationData.current;
 };
@@ -231,6 +252,13 @@ function CameraUI () {
     this._promise = null;
     this._cancelled = false;
     this._captured = null;
+    this._props = new Windows.Foundation.Collections.PropertySet();
+    this._props.insert(PROPERTY_QUALITY, 50);
+    this._props.insert(PROPERTY_GRAYSCALE, false);
+    this._props.insert(PROPERTY_ROTATION, 0);
+    this._props.insert(PROPERTY_CAPTURE, false);
+    this._props.insert(PROPERTY_RESULT, "");
+
     this._reader = null;
     this._onFrameArrivedBound = null;
     this._helper = null;
@@ -415,16 +443,30 @@ CameraUI.prototype.onFrameArrived = function() {
  * @return  {Promise<CaptureResult>}  document capture result or null if search
  *   cancelled.
  */
-CameraUI.prototype.capturing = function () {
+CameraUI.prototype.capturing = function (usePropertySet) {
 
     /**
      * Checks for result from media filter. If there is no result
      *   found, returns null.
      */
-    function checkForResult(capture, frameReader, captured, fail) {
+    function checkForResult(capture, propertySet, frameReader, captured, fail) {
         return WinJS.Promise.timeout(200).then(function () {
             return new WinJS.Promise(function (complete) {
-                if (captured && typeof captured === "string") {
+				if (useResultProperty) {
+                    var value = null;
+                    if (propertySet && captured) {
+                        try {
+                            value = propertySet.lookup(PROPERTY_RESULT);
+                            if (value && !value.length) {
+                                value = null;
+                            }
+                        } catch (e) {
+                            console.error('propertySet.lookup failed: ' + e);
+                        }
+                    }
+                    complete(value);
+                    return WinJS.Promise.as();
+                } else if (captured && typeof captured === "string") {
                     complete(captured);
                 } else {
                     complete(null);
@@ -434,23 +476,25 @@ CameraUI.prototype.capturing = function () {
     }
 
     var that = this;
-    return checkForResult(this._capture, this._reader, this._captured, this._fail).then(function (result) {
+    return checkForResult(this._capture, this._props, this._reader, this._captured, this._fail).then(function (result) {
         if (that._cancelled)
             return null;
 
-        return result || (that._promise = that.capturing());
+        return result || (that._promise = that.capturing(usePropertySet));
     });
 };
 
-CameraUI.prototype.capturePhoto = function (bDontClip, quality, fileName, returnBase64, convertToGrayscale) {
+CameraUI.prototype.capturePhoto = function (bDontClip, useEffectFilter, quality, fileName, returnBase64, convertToGrayscale) {
     if (this._captureLaterPromise) {
         this._captureLaterPromise.cancel();
     }
-    if (this._capture && this._helper) {
+    if (useEffectFilter) {
+		this._captured = true;
+    } else if (this._capture && this._helper) {
         var that = this;
         if (!bDontClip && !(this._points && this._points.length === 8)) {
             this._captureLaterPromise = WinJS.Promise.timeout(CHECK_PLAYING_TIMEOUT).then(function() {
-                return that.capturePhoto(bDontClip, quality, fileName, returnBase64, convertToGrayscale);
+                return that.capturePhoto(bDontClip, useEffectFilter, quality, fileName, returnBase64, convertToGrayscale);
             });
             return this._captureLaterPromise;
         }
@@ -628,6 +672,8 @@ module.exports = {
      * 2 dontClip:true|false
      */
     scanDoc: function (success, fail, args) {
+		var version = getMajorVersion();
+
         var captureCanvas,
             capturePreview,
             capturePreviewFrame,
@@ -696,6 +742,14 @@ module.exports = {
             }*/
             return null;
         }
+
+        var getUseEffectFilter = function() {
+			if (!getDontClip() && version !== 10) {
+				return true;
+		    } else {
+				return false;
+		    }
+	    }
 
         function resizeLater() {
             WinJS.Promise.timeout(CLICK_FOCUS_DELAY).then(function () {
@@ -840,6 +894,34 @@ module.exports = {
 
             document.addEventListener("backbutton", cancelPreview, false);
         }
+
+        function addEffectToImageStream(bDoCapture) {
+            if (camera && typeof capture.addEffectAsync === "function") {
+                var props = camera._props;
+                var rotation = getRotationDegree();
+                if (rotation) {
+                    rotation = 360 - (rotation % 360);
+                } else {
+                    rotation = 0;
+                }
+                props.insert(PROPERTY_QUALITY, getQuality());
+                props.insert(PROPERTY_GRAYSCALE, getConvertToGrayscale());
+                props.insert(PROPERTY_ROTATION, rotation);
+                props.insert(PROPERTY_CAPTURE, bDoCapture);
+
+                return capture.clearEffectsAsync(Windows.Media.Capture.MediaStreamType.videoPreview).then(function() {
+                    if (!getDontClip()) {
+                        return capture.addEffectAsync(Windows.Media.Capture.MediaStreamType.videoPreview,
+                            'ClippingCamera.ImageClipping',
+                            props);
+                    } else {
+                        return null;
+                    }
+                });
+            } else {
+                return WinJS.Promise.as();
+            }
+        };
 
         function reposition(widthFrame, heightFrame, currentOrientation) {
             if (widthFrame > 0 && heightFrame > 0 && capturePreview && capturePreview.style) {
@@ -1101,7 +1183,10 @@ module.exports = {
         }
 
         function capturePhoto() {
-            camera && camera.capturePhoto(getDontClip(), getQuality(), getFileName(), getReturnBase64(), getConvertToGrayscale());
+            if (getUseEffectFilter()) {
+			  addEffectToImageStream(true);
+		    }
+            camera && camera.capturePhoto(getDontClip(), getUseEffectFilter(), getQuality(), getFileName(), getReturnBase64(), getConvertToGrayscale());
         }
 
         function photoActionHot() {
@@ -1312,69 +1397,76 @@ module.exports = {
          * Removes preview frame and corresponding objects from window
          */
         function destroyPreview() {
+
+            var promise;
+			if (getUseEffectFilter() && capture) {
+			    promise = capture.clearEffectsAsync(Windows.Media.Capture.MediaStreamType.videoPreview)
+		    } else {
+				promise = WinJS.Promise.as();
+			}
+
             if (cancelPromise) {
                 cancelPromise.cancel();
                 cancelPromise = null;
             }
-            var promise = WinJS.Promise.as();
 
-            Windows.Graphics.Display.DisplayInformation.getForCurrentView().removeEventListener("orientationchanged", updatePreviewForRotation, false);
-            document.removeEventListener("backbutton", cancelPreview);
+            return promise.then(function() {
+                Windows.Graphics.Display.DisplayInformation.getForCurrentView().removeEventListener("orientationchanged", updatePreviewForRotation, false);
+                document.removeEventListener("backbutton", cancelPreview);
 
-            if (capturePreview) {
-                var isPlaying = !capturePreview.paused && !capturePreview.ended && capturePreview.readyState > 2;
-                if (isPlaying) {
-                    capturePreview.pause();
+                if (capturePreview) {
+                    var isPlaying = !capturePreview.paused && !capturePreview.ended && capturePreview.readyState > 2;
+                    if (isPlaying) {
+                        capturePreview.pause();
+                    }
+
+                    // http://stackoverflow.com/a/28060352/4177762
+                    capturePreview.src = "";
+                    if (capturePreview.load) {
+                        capturePreview.load();
+                    }
+                    window.removeEventListener("focus", continueVideoOnFocus);
+                    window.removeEventListener("resize", resizePreview);
+                    if (captureCanvas) {
+                        captureCanvas.removeEventListener("click", clickPreview);
+                    } else {
+                        capturePreview.removeEventListener("click", clickPreview);
+                    }
+                }
+                if (closeButton) {
+                    closeButton.removeEventListener("click", cancelPreview);
+                }
+                if (photoButton) {
+                    photoButton.removeEventListener("click", capturePhoto);
+                    photoButton.removeEventListener("mouseover", photoActionHot);
+                    photoButton.removeEventListener("mouseout", photoActionNormal);
                 }
 
-                // http://stackoverflow.com/a/28060352/4177762
-                capturePreview.src = "";
-                if (capturePreview.load) {
-                    capturePreview.load();
+                if (capturePreviewFrame) {
+                    try {
+                        document.body.removeChild(capturePreviewFrame);
+                    } catch (e) {
+                        // Catching NotFoundError
+                        console.error(e);
+                    }
                 }
-                window.removeEventListener("focus", continueVideoOnFocus);
-                window.removeEventListener("resize", resizePreview);
-                if (captureCanvas) {
-                    captureCanvas.removeEventListener("click", clickPreview);
-                } else {
-                    capturePreview.removeEventListener("click", clickPreview);
+                capturePreviewFrame = null;
+
+                camera && camera.stop();
+                camera = null;
+
+                if (capture) {
+                    try {
+                        promise = capture.stopRecordAsync();
+                    } catch (e) {
+                        // Catching NotFoundError
+                        console.error(e);
+                    }
                 }
-            }
-            if (closeButton) {
-                closeButton.removeEventListener("click", cancelPreview);
-            }
-            if (photoButton) {
-                photoButton.removeEventListener("click", capturePhoto);
-                photoButton.removeEventListener("mouseover", photoActionHot);
-                photoButton.removeEventListener("mouseout", photoActionNormal);
-            }
+                capture = null;
 
-            if (capturePreviewFrame) {
-                try {
-                    document.body.removeChild(capturePreviewFrame);
-                } catch (e) {
-                    // Catching NotFoundError
-                    console.error(e);
-                }
-            }
-            capturePreviewFrame = null;
-
-            camera && camera.stop();
-            camera = null;
-
-            if (capture) {
-                try {
-                    promise = capture.stopRecordAsync();
-                } catch (e) {
-                    // Catching NotFoundError
-                    console.error(e);
-                }
-            }
-            capture = null;
-
-            enableZoomAndScroll();
-
-            return promise;
+                enableZoomAndScroll();
+		    });
         }
 
         // Timeout is needed so that the .done finalizer below can be attached to the promise.
@@ -1394,36 +1486,39 @@ module.exports = {
                 return captureSettings;
             });
         })
-        .then(function (captureSettings) {
+        .then(function () {
             checkCancelled();
-            if (getDontClip()) {
+            if (getUseEffectFilter()) {
+                return addEffectToImageStream(false);
+		    } else if (getDontClip()) {
                 return WinJS.Promise.as();
+            } else {
+                return camera.createReader().then(function (frameReader) {
+					checkCancelled();
+					if (getDontClip()) {
+						return WinJS.Promise.as();
+					}
+					return camera.attach(frameReader);
+				});
             }
-            return camera.createReader();
-        })
-        .then(function (frameReader) {
-            checkCancelled();
-            if (getDontClip()) {
-                return WinJS.Promise.as();
-            }
-            return camera.attach(frameReader);
         })
         .then(function () {
-            WinJS.Promise.timeout(CHECK_FRAME_ARRIVED_TIMEOUT).then(function() {
-                checkCancelled();
-                if (!camera.hasFrameArrived()) {
-                    camera.release().then(function() {
-                        checkCancelled();
-                        return camera.createReader(true);
-                    })
-                    .then(function(frameReader) {
-                        checkCancelled();
-                        camera.attach(frameReader);
-                    });
-                }
-            });
+			if (!getUseEffectFilter() && !getDontClip()) {
+                WinJS.Promise.timeout(CHECK_FRAME_ARRIVED_TIMEOUT).then(function() {
+                    checkCancelled();
+                    if (!camera.hasFrameArrived()) {
+                        camera.release().then(function() {
+                            checkCancelled();
+                            return camera.createReader(true);
+                        }).then(function(frameReader) {
+                            checkCancelled();
+                            camera.attach(frameReader);
+                        });
+                    }
+                });
+            }
             checkCancelled();
-            return camera.capturing();
+            return camera.capturing(getUseEffectFilter());
         })
         .then(function (result) {
             // Suppress null result (cancel) on suspending

@@ -1,0 +1,141 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|ARM">
+      <Configuration>Debug</Configuration>
+      <Platform>ARM</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|ARM">
+      <Configuration>Release</Configuration>
+      <Platform>ARM</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{BA69218F-DA5C-4D14-A78D-21A9E4DEC670}</ProjectGuid>
+    <RootNamespace>ClippingCamera</RootNamespace>
+    <ProjectName>ClippingCamera</ProjectName>
+    <MinimumVisualStudioVersion>12.0</MinimumVisualStudioVersion>
+    <AppContainerApplication>true</AppContainerApplication>
+    <ApplicationType>Windows Phone</ApplicationType>
+    <ApplicationTypeRevision>8.1</ApplicationTypeRevision>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120_wp81</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <PlatformToolset>v120_wp81</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <PropertyGroup>
+    <DefaultLanguage>en-US</DefaultLanguage>
+  </PropertyGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="opencv.Phone.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="opencv.Phone.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
+    <GenerateManifest>false</GenerateManifest>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
+    <GenerateManifest>false</GenerateManifest>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PreprocessorDefinitions>_WINRT_DLL;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeaderFile>
+      </PrecompiledHeaderFile>
+      <PrecompiledHeaderOutputFile>
+      </PrecompiledHeaderOutputFile>
+      <AdditionalUsingDirectories>$(WindowsSDK_WindowsMetadata);$(AdditionalUsingDirectories)</AdditionalUsingDirectories>
+      <CompileAsWinRT>false</CompileAsWinRT>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(ProjectDir)\..\install\include</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories);$(ProjectDir)\..\install\lib\$(PlatformTarget)</AdditionalLibraryDirectories>
+      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
+      <ModuleDefinitionFile>ClippingCamera.def</ModuleDefinitionFile>
+    </Link>
+    <CustomBuildStep>
+      <Command>mdmerge -metadata_dir "$(WindowsSDK_MetadataPath)" -o "$(SolutionDir)$(Platform)\$(Configuration)\$(MSBuildProjectName)" -i "$(MSBuildProjectDirectory)" -v -partial</Command>
+      <Outputs>$(SolutionDir)$(Platform)\$(Configuration)\$(MSBuildProjectName)\$(ProjectName).winmd</Outputs>
+    </CustomBuildStep>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PreprocessorDefinitions>_WINRT_DLL;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeaderFile>
+      </PrecompiledHeaderFile>
+      <PrecompiledHeaderOutputFile>
+      </PrecompiledHeaderOutputFile>
+      <AdditionalUsingDirectories>$(WindowsSDK_WindowsMetadata);$(AdditionalUsingDirectories)</AdditionalUsingDirectories>
+      <CompileAsWinRT>false</CompileAsWinRT>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
+      <ModuleDefinitionFile>ClippingCamera.def</ModuleDefinitionFile>
+    </Link>
+    <CustomBuildStep>
+      <Command>mdmerge -metadata_dir "$(WindowsSDK_MetadataPath)" -o "$(SolutionDir)$(Platform)\$(Configuration)\$(MSBuildProjectName)" -i "$(MSBuildProjectDirectory)" -v -partial</Command>
+      <Outputs>$(SolutionDir)$(Platform)\$(Configuration)\$(MSBuildProjectName)\$(ProjectName).winmd</Outputs>
+    </CustomBuildStep>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="ClippingCamera.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="dllmain.cpp" />
+    <ClCompile Include="ClippingCamera.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ClippingCamera.def" />
+  </ItemGroup>
+  <ItemGroup>
+    <Midl Include="ImageClipping.idl">
+      <MetadataFileName Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
+      </MetadataFileName>
+      <MetadataFileName Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
+      </MetadataFileName>
+      <AdditionalMetadataDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">$(WindowsSDK_MetadataPath)</AdditionalMetadataDirectories>
+      <AdditionalMetadataDirectories Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">$(WindowsSDK_MetadataPath)</AdditionalMetadataDirectories>
+      <EnableWindowsRuntime Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">true</EnableWindowsRuntime>
+      <EnableWindowsRuntime Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">true</EnableWindowsRuntime>
+      <HeaderFileName Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">%(Filename).h</HeaderFileName>
+      <HeaderFileName Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">%(Filename).h</HeaderFileName>
+    </Midl>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ItemGroup>
+    <_MdMergeOutput Condition="'$(Platform)' == 'Win32'" Include="$(ProjectDir)$(Configuration)\$(MSBuildProjectName)\$(ProjectName).winmd" />
+    <_MdMergeOutput Condition="'$(Platform)' != 'Win32'" Include="$(SolutionDir)$(Platform)\$(Configuration)\$(MSBuildProjectName)\$(ProjectName).winmd" />
+  </ItemGroup>
+  <Target Name="CopyWinmdArtifactsOutputGroup" Returns="@(CopyWinmdArtifactsOutputGroupOutputs)">
+    <ItemGroup>
+      <CopyWinmdArtifactsOutputGroupOutputs Include="@(_MdMergeOutput)">
+        <TargetPath>$(ProjectName).winmd</TargetPath>
+        <Implementation>$(TargetName)$(TargetExt)</Implementation>
+      </CopyWinmdArtifactsOutputGroupOutputs>
+    </ItemGroup>
+  </Target>
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

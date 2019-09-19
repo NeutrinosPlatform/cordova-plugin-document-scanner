@@ -56,6 +56,16 @@
     <config-file target="package.appxmanifest" parent="/Package/Capabilities">
       <DeviceCapability Name="webcam"/>
     </config-file>
+    <config-file target="package.appxmanifest" parent="/Package/Extensions" versions="8.1">
+      <Extension Category="windows.activatableClass.inProcessServer">
+        <InProcessServer>
+          <Path>ClippingCamera.dll</Path>
+          <ActivatableClass ActivatableClassId="ClippingCamera.ImageClipping" ThreadingModel="both" />
+        </InProcessServer>
+      </Extension>
+    </config-file>
+    <framework src="src/windows/filter/ClippingCamera/ClippingCamera.vcxproj" custom="true" type="projectReference" target="windows" versions="8.1"/>
+    <framework src="src/windows/filter/ClippingCamera/ClippingCamera.Phone.vcxproj" custom="true" type="projectReference" target="phone" versions="8.1"/>
     <framework src="src/windows/lib/OpenCVBridge/OpenCVBridge.vcxproj" custom="true" type="projectReference" versions="10.*"/>
     <asset src="src/windows/assets/plugin-document-scanner.css" target="css/plugin-document-scanner.css"/>
   </platform>
