@@ -25,11 +25,11 @@ var DEFAULT_ASPECT_RATIO = '1.8';
 // Highest possible z-index supported across browsers. Anything used above is converted to this value.
 var HIGHEST_POSSIBLE_Z_INDEX = 2147483647;
 
-var PROPERTY_QUALITY    "{698649BE-8EAE-4551-A4CB-2FA79A4E1E70}";
-var PROPERTY_GRAYSCALE  "{698649BE-8EAE-4551-A4CB-2FA79A4E1E71}";
-var PROPERTY_ROTATION   "{698649BE-8EAE-4551-A4CB-2FA79A4E1E72}";
-var PROPERTY_CAPTURE    "{698649BE-8EAE-4551-A4CB-2FA79A4E1E79}";
-var PROPERTY_RESULT     "{698649BE-8EAE-4551-A4CB-2FA79A4E1E80}"
+var PROPERTY_QUALITY  = "{698649BE-8EAE-4551-A4CB-2FA79A4E1E70}";
+var PROPERTY_GRAYSCALE= "{698649BE-8EAE-4551-A4CB-2FA79A4E1E71}";
+var PROPERTY_ROTATION = "{698649BE-8EAE-4551-A4CB-2FA79A4E1E72}";
+var PROPERTY_CAPTURE  = "{698649BE-8EAE-4551-A4CB-2FA79A4E1E79}";
+var PROPERTY_RESULT   = "{698649BE-8EAE-4551-A4CB-2FA79A4E1E80}";
 
 var analyticsVersionInfo = Windows.System.Profile.AnalyticsInfo && Windows.System.Profile.AnalyticsInfo.versionInfo;
 var getVersion = function() {
@@ -38,11 +38,7 @@ var getVersion = function() {
 var getMajorVersion = function() {
 	var majorVersion = 0;
 	if (analyticsVersionInfo && analyticsVersionInfo.deviceFamilyVersion) {
-		var pos = analyticsVersionInfo.deviceFamilyVersion.indexOf('.');
-		if (pos < 0) {
-			pos = analyticsVersionInfo.deviceFamilyVersion.length;
-		}
-		majorVersion = parseInt(analyticsVersionInfo.deviceFamilyVersion.substr(0,pos);
+		majorVersion = Math.floor(parseInt(analyticsVersionInfo.deviceFamilyVersion) / 0x1000000000000);
 	}
 	return majorVersion;
 }
@@ -452,7 +448,7 @@ CameraUI.prototype.capturing = function (usePropertySet) {
     function checkForResult(capture, propertySet, frameReader, captured, fail) {
         return WinJS.Promise.timeout(200).then(function () {
             return new WinJS.Promise(function (complete) {
-				if (useResultProperty) {
+				if (usePropertySet) {
                     var value = null;
                     if (propertySet && captured) {
                         try {
