@@ -77,7 +77,7 @@ Platform::Array<int>^ OpenCVHelper::GetPoints(Windows::Graphics::Imaging::Softwa
     // blur will enhance edge detection
 	//Mat blurred(inputMat);
     //medianBlur(inputMat, blurred, 9);
-	
+
 	Mat gray0(inputMat.size(), CV_8U), gray;
 
 	std::vector<std::vector<cv::Point> > contours;
@@ -99,16 +99,16 @@ Platform::Array<int>^ OpenCVHelper::GetPoints(Windows::Graphics::Imaging::Softwa
             // Canny helps to catch squares with gradient shading
             //if (l == 0) {
                 Canny(gray0, gray, 10, 20, 3); //
-                
+
                 // Dilate helps to remove potential holes between edge segments
                 dilate(gray, gray, Mat(), cv::Point(-1,-1));
             //} else {
             //    gray = gray0 >= (l+1) * 255 / threshold_level;
             //}
-            
+
             // Find contours and store them in a list
             findContours(gray, contours, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
-            
+
             // Test contours
             std::vector<cv::Point> approx;
             for (size_t i = 0; i < contours.size(); i++) {
@@ -135,9 +135,9 @@ Platform::Array<int>^ OpenCVHelper::GetPoints(Windows::Graphics::Imaging::Softwa
 							approx[3] = swap;
 						}
 						// use only appropriate polygons
-						double len1 = norm(approx[1] - approx[0]), 
-							len2 = norm(approx[2] - approx[1]), 
-							len3 = norm(approx[3] - approx[2]), 
+						double len1 = norm(approx[1] - approx[0]),
+							len2 = norm(approx[2] - approx[1]),
+							len3 = norm(approx[3] - approx[2]),
 							len4 = norm(approx[0] - approx[3]);
 						if (len1 > w8 &&
 							len2 > h8 &&
@@ -145,17 +145,17 @@ Platform::Array<int>^ OpenCVHelper::GetPoints(Windows::Graphics::Imaging::Softwa
 							len4 > h8 &&
 							abs(len1 - len3) < ((len1 + len3) / 4) &&
 							abs(len2 - len4) < ((len2 + len4) / 4) &&
-							(abs(width  - len1) > w8 &&
-							 abs(width  - len3) > w8 ||
-							 abs(height - len2) > h8 &&
-							 abs(height - len4) > h8)) {
+							(abs(width  - len1) > w16 &&
+							 abs(width  - len3) > w16 ||
+							 abs(height - len2) > h16 &&
+							 abs(height - len4) > h16)) {
 							double maxCosine = 0;
-                    
+
 							for (int j = 2; j < 5; j++) {
 								double cosine = fabs(angle(approx[j%4], approx[j-2], approx[j-1]));
 								maxCosine = MAX(maxCosine, cosine);
 							}
-                    
+
 							if (maxCosine < 0.3) {
 								points = approx;
 								max_area = area;
