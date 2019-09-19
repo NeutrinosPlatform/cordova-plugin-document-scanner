@@ -182,7 +182,10 @@ function MediaFrameReader (newCapture, newWidth, newHeight) {
                 videoMediaFrame: capturedFrame
             };
             element.dispatchEvent(new Event('framearrived'));
-            return getPreviewFrameAsync();
+            // give some delay to enable UI interaction
+            return WinJS.Promise.timeout(50).then(function() {
+                getPreviewFrameAsync();
+            });
         });
     }
 
@@ -727,26 +730,25 @@ module.exports = {
             var orientation = displayInformation.currentOrientation;
             reposition(width, height, orientation);
             if (photoButton && photoButton.style) {
+                photoButtonBkg.style.width = (photoButton.clientHeight * 2).toString() + "px";
+                photoButtonBkg.style.height = (photoButton.clientHeight * 2).toString() + "px";
+                photoButtonBkg.style.borderWidth = photoButton.clientHeight.toString() + "px";
+                photoButtonBkg.style.borderRadius = photoButton.clientHeight.toString() + "px";
                 if (width > 499) {
                     var bottom = (height - photoButton.clientHeight) / 2;
                     photoButton.style.bottom = bottom.toString() + "px";
+                    photoButton.style.right = "";
                     if (photoButtonBkg && photoButtonBkg.style) {
-                        photoButtonBkg.style.display = "block";
-                        photoButtonBkg.style.bottom = (bottom - photoButton.clientHeight / 2).toString() + "px";
-                        photoButtonBkg.style.width = (photoButton.clientHeight * 2).toString() + "px";
-                        photoButtonBkg.style.height = (photoButton.clientHeight * 2).toString() + "px";
-                        photoButtonBkg.style.borderWidth = photoButton.clientHeight.toString() + "px";
-                        photoButtonBkg.style.borderRadius = photoButton.clientHeight.toString() + "px";
+                        photoButtonBkg.style.bottom = (bottom - photoButton.clientHeight / 2 - photoButton.clientHeight / 10).toString() + "px";
+                        photoButtonBkg.style.right = "";
                     }
                 } else {
-                    photoButton.style.bottom = "";
+                    var right = width / 2 - photoButton.clientWidth;
+                    photoButton.style.bottom = (photoButton.clientHeight / 2 + photoButton.clientHeight / 10).toString() + "px";
+                    photoButton.style.right = right.toString() + "px";
                     if (photoButtonBkg && photoButtonBkg.style) {
-                        photoButtonBkg.style.display = "";
-                        photoButtonBkg.style.bottom = "";
-                        photoButtonBkg.style.width = "";
-                        photoButtonBkg.style.height = "";
-                        photoButtonBkg.style.borderWidth = "";
-                        photoButtonBkg.style.borderRadius = "";
+                        photoButtonBkg.style.bottom = "0";
+                        photoButtonBkg.style.right = right.toString() + "px";
                     }
                 }
             }
@@ -777,8 +779,6 @@ module.exports = {
 
             capturePreview = document.createElement("video");
             capturePreview.className = "document-scanner-ui-preview";
-            window.addEventListener("resize", resizePreview, false);
-            window.addEventListener("focus", continueVideoOnFocus, false);
 
             if (getDontClip()) {
                 capturePreview.addEventListener("click", clickPreview, false);
@@ -811,6 +811,9 @@ module.exports = {
 
             photoButton = document.createElement("span");
             photoButton.className = "document-scanner-app-bar-action document-scanner-action-photo";
+            photoButton.addEventListener("click", capturePhoto, false);
+            photoButton.addEventListener("mouseover", photoActionHot, false);
+            photoButton.addEventListener("mouseout", photoActionNormal, false);
             navigationButtonsDiv.appendChild(photoButton);
 
             //settingsButton = document.createElement("span");
@@ -821,9 +824,6 @@ module.exports = {
             if (closeButton) {
                 closeButton.addEventListener("click", cancelPreview, false);
             }
-            document.addEventListener("backbutton", cancelPreview, false);
-
-            photoButton.addEventListener("click", capturePhoto, false);
 
             if (getAutoShutter()) {
                 cancelPromise = WinJS.Promise.timeout(60000).then(cancelPreview);
@@ -834,6 +834,11 @@ module.exports = {
                 capturePreviewFrame.appendChild(captureCanvas);
             }
             capturePreviewFrame.appendChild(navigationButtonsDiv);
+
+            window.addEventListener("resize", resizePreview, false);
+            window.addEventListener("focus", continueVideoOnFocus, false);
+
+            document.addEventListener("backbutton", cancelPreview, false);
         }
 
         function reposition(widthFrame, heightFrame, currentOrientation) {
@@ -1099,6 +1104,24 @@ module.exports = {
             camera && camera.capturePhoto(getDontClip(), getQuality(), getFileName(), getReturnBase64(), getConvertToGrayscale());
         }
 
+        function photoActionHot() {
+            if (photoButtonBkg && photoButtonBkg.style) {
+                photoButtonBkg.style.backgroundColor = "black";
+            }
+            if (photoButton && photoButton.style) {
+                photoButton.style.color = "white";
+            }
+        }
+
+        function photoActionNormal() {
+            if (photoButtonBkg && photoButtonBkg.style) {
+                photoButtonBkg.style.backgroundColor = "";
+            }
+            if (photoButton && photoButton.style) {
+                photoButton.style.color = "";
+            }
+        }
+
         function checkCancelled() {
             if (CameraUI.captureCancelled || CameraUI.suspended) {
                 throw new Error('Canceled');
@@ -1322,6 +1345,8 @@ module.exports = {
             }
             if (photoButton) {
                 photoButton.removeEventListener("click", capturePhoto);
+                photoButton.removeEventListener("mouseover", photoActionHot);
+                photoButton.removeEventListener("mouseout", photoActionNormal);
             }
 
             if (capturePreviewFrame) {

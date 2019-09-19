@@ -54,7 +54,7 @@
     height: 80px;
     border-width: 40px;
     border-radius: 40px;
-    background-color: rgba(0, 0, 0, 0.2);
+    background-color: white;
 }
 
 .document-scanner-action-text {
@@ -65,13 +65,14 @@
 }
 
 .document-scanner-action-bkg {
-    display: none;
+    display: block;
     position: absolute;
     right: 0;
 }
 .document-scanner-action-photo {
     display: block;
     position: absolute;
+    color: black;
     right: 0;
 }
 .document-scanner-action-close {
@@ -96,7 +97,6 @@
 }
 .document-scanner-action-close:hover::before {
     content: "\E2A8";
-    color: gray;
 }
 
 .document-scanner-action-settings::before {
@@ -105,7 +105,6 @@
 }
 .document-scanner-action-settings:hover::before {
     content: "\E15E";
-    color: gray;
 }
 
 .document-scanner-action-photo::before {
@@ -114,7 +113,6 @@
 }
 .document-scanner-action-photo:hover::before {
     content: "\E114";
-    color: gray;
 }
 
 .no-zoom {
@@ -128,5 +126,8 @@
 @media (max-width:499px) {
     .document-scanner-action-close {
         display: none;
+    }
+    .document-scanner-action-photo {
+        right: calc(50% - 20px);
     }
 }
