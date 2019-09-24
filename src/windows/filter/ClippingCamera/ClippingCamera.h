@@ -228,8 +228,7 @@ private:
     HRESULT OnFlush();
     HRESULT UpdateFormatInfo();
 
-	BOOL RectifyAndCut(std::vector<cv::Point2f> approx);
-	HRESULT ReturnProperty();
+	HRESULT ReturnProperty(cv::Mat& image);
 
     CRITICAL_SECTION            m_critSec;
 
@@ -238,6 +237,10 @@ private:
 	UINT32						m_nQuality;
 	boolean			            m_bConvertToGrayscale;
 	UINT32						m_nRotation;
+
+	std::vector<cv::Point>      m_prevPoints;
+	int                         m_prevWdth;
+	int                         m_prevHght;
 
     // Streaming
 	BOOL                        m_bStreamingInitialized;
@@ -252,9 +255,7 @@ private:
 
     IMFAttributes               *m_pAttributes;
 
-	std::vector<cv::Point2f>    m_prevApprox;
-	cv::Mat						m_prevImage;
-
 	ABI::Windows::Foundation::Collections::IMap<HSTRING, IInspectable *> *m_pSetting;
+    double angle( cv::Point pt1, cv::Point pt2, cv::Point pt0 );
 };
 #endif

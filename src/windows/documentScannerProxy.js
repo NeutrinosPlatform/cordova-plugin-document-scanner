@@ -1227,11 +1227,13 @@ module.exports = {
                     throw e;
                 }
                 captureInitSettings.videoDeviceId = id;
-                captureInitSettings.sharingMode = Windows.Media.Capture.MediaCaptureSharingMode.exclusiveControl;
+                captureInitSettings.sharingMode = Windows.Media.Capture.MediaCaptureSharingMode &&
+                    Windows.Media.Capture.MediaCaptureSharingMode.exclusiveControl;
                 captureInitSettings.streamingCaptureMode = Windows.Media.Capture.StreamingCaptureMode.video;
 
                 // use of SoftwareBitmap member in captured frames
-                captureInitSettings.memoryPreference = Windows.Media.Capture.MediaCaptureMemoryPreference.cpu;
+                captureInitSettings.memoryPreference = Windows.Media.Capture.MediaCaptureMemoryPreference &&
+                    Windows.Media.Capture.MediaCaptureMemoryPreference.cpu;
 
                 // try first with photo capture source
                 captureInitSettings.photoCaptureSource = Windows.Media.Capture.PhotoCaptureSource.photo;

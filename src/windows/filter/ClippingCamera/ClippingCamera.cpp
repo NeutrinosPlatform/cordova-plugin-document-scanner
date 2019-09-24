@@ -81,7 +81,8 @@ ImageClipping::ImageClipping() :
 	m_pAttributes(NULL), m_pSetting(NULL),
 	m_bDoClip(false), m_nQuality(100), m_bConvertToGrayscale(false), m_nRotation(0)
 {
-    InitializeCriticalSectionEx(&m_critSec, 3000, 0);
+	m_prevPoints.clear();
+	InitializeCriticalSectionEx(&m_critSec, 3000, 0);
 }
 
 ImageClipping::~ImageClipping()
@@ -1310,6 +1311,16 @@ HRESULT ImageClipping::EndStreaming()
     return S_OK;
 }
 
+
+bool comp_horz(cv::Point2f a, cv::Point2f b)
+{
+	return a.x < b.x;
+}
+bool comp_vert(cv::Point2f a, cv::Point2f b)
+{
+	return a.y < b.y;
+}
+
 // Generate output data.
 
 HRESULT ImageClipping::OnProcessOutput(IMFMediaBuffer *pIn, IMFMediaBuffer *pOut)
@@ -1327,104 +1338,296 @@ HRESULT ImageClipping::OnProcessOutput(IMFMediaBuffer *pIn, IMFMediaBuffer *pOut
     // Stride if the buffer does not support IMF2DBuffer
     LONG lDefaultStride = 0;
 
+	UINT32 width = m_imageWidthInPixels;
+	UINT32 height = m_imageHeightInPixels;
+
     HRESULT hr = GetDefaultStride(m_pInputType, &lDefaultStride);
-    if (FAILED(hr))
-    {
+    if (FAILED(hr)) {
         return hr;
     }
 
     // Lock the input buffer.
-    hr = inputLock.LockBuffer(lDefaultStride, m_imageHeightInPixels, &pSrc, &lSrcStride);
-    if (FAILED(hr))
-    {
+    hr = inputLock.LockBuffer(lDefaultStride, height, &pSrc, &lSrcStride);
+    if (FAILED(hr)) {
         return hr;
     }
 
     // Lock the output buffer.
-    hr = outputLock.LockBuffer(lDefaultStride, m_imageHeightInPixels, &pDest, &lDestStride);
-    if (FAILED(hr))
-    {
+    hr = outputLock.LockBuffer(lDefaultStride, height, &pDest, &lDestStride);
+    if (FAILED(hr)) {
         return hr;
     }
 
-    cv::Mat InputFrame(m_imageHeightInPixels + m_imageHeightInPixels/2, m_imageWidthInPixels, CV_8UC1, pSrc, lSrcStride);
-    cv::Mat WorkFrame(InputFrame, cv::Range(0, m_imageHeightInPixels), cv::Range(0, m_imageWidthInPixels));
-    cv::Mat OutputFrame(m_imageHeightInPixels + m_imageHeightInPixels/2, m_imageWidthInPixels, CV_8UC1, pDest, lDestStride);
-
-	if (m_bDoClip) {
-		if (m_bConvertToGrayscale) {
-			cv::cvtColor(InputFrame, m_prevImage, cv::COLOR_YUV420sp2GRAY);
-		} else {
-			cv::cvtColor(InputFrame, m_prevImage, cv::COLOR_YUV420sp2RGB);
-		}
-	}
+    cv::Mat InputFrame(height + height/2, width, CV_8UC1, pSrc, lSrcStride);
+    cv::Mat OutputFrame(height + height/2, width, CV_8UC1, pDest, lDestStride);
 
 	InputFrame.copyTo(OutputFrame);
 
-	cv::GaussianBlur(WorkFrame, WorkFrame, cv::Size(5, 5), 0);
-
-	cv::Canny(WorkFrame, WorkFrame, 60, 200);
-
-	//Extract the contours
-	std::vector<std::vector<cv::Point>> contours;
-	cv::findContours(WorkFrame, contours, cv::RETR_LIST, cv::CHAIN_APPROX_SIMPLE);
-
-	double minArea = (m_imageWidthInPixels *  m_imageHeightInPixels) / 8;
-	double maxArea = 0;
-	size_t idx_max = -1;
-	size_t count = contours.size();
-	for (size_t k = 0; k < count; k++) {
-		std::vector<cv::Point> hull;
-		cv::convexHull(contours[k], hull);
-		double area = cv::contourArea(hull);
-		if (area > maxArea && area > minArea) {
-			maxArea = area;
-			idx_max = k;
+	cv::Mat image;
+	if (m_bDoClip) {
+		if (m_bConvertToGrayscale) {
+			cv::cvtColor(InputFrame, image, cv::COLOR_YUV420sp2GRAY);
+		} else {
+			cv::cvtColor(InputFrame, image, cv::COLOR_YUV420sp2RGB);
 		}
 	}
-	std::vector<cv::Point2f> approx;
-	if (idx_max >= 0 && idx_max < count) {
-		double peri = cv::arcLength(contours[idx_max], true);
-		cv::approxPolyDP(contours[idx_max], approx, 0.02 * peri, true);
-		if (approx.size() == 4) {
-			m_prevApprox = approx;
-		}
-		else {
-			approx = m_prevApprox;
-			m_prevApprox.clear();
-		}
+
+	cv::Mat WorkFrame;
+	cv::cvtColor(InputFrame, WorkFrame, cv::COLOR_YUV420sp2BGRA);
+
+	double scale = 1.0;
+	int max_len = 640;//1280;
+	if (width > height && width > max_len) {
+        scale = (double)max_len / (double)width;
+	} else if (height > max_len) {
+        scale = (double)max_len / (double)height;
 	}
-	else {
-		approx = m_prevApprox;
-		m_prevApprox.clear();
+	if (scale < 1.0) {
+		cv::Mat scaled;
+		cv::resize(WorkFrame,scaled,cv::Size(),scale,scale,cv::INTER_NEAREST);
+	    width = scaled.cols;
+	    height = scaled.rows;
+	    cv::blur(scaled, scaled, cv::Size(3, 3));
+		WorkFrame = scaled;
+	} else {
+	    cv::blur(WorkFrame, WorkFrame, cv::Size(3, 3));
 	}
-	if (approx.size() == 4) {
-		if (RectifyAndCut(approx)) {
-			ReturnProperty();
+	int w8 = width / 8;
+	int h8= height / 8;
+	int w16 = w8 / 2;
+	int h16= h8 / 2;
+	int wdth = 0, hght = 0;
+
+	//cv::GaussianBlur(WorkFrame, WorkFrame, cv::Size(5, 5), 0);
+	//cv::Canny(WorkFrame, WorkFrame, 60, 200);
+
+	cv::Mat gray0(WorkFrame.size(), CV_8U), gray;
+
+	std::vector<std::vector<cv::Point> > contours;
+    //std::vector<std::vector<cv::Point> > squares;
+
+	double smallest_area = (width * height) / 64.0;
+	double max_area = 0;
+
+	std::vector<cv::Point> points;
+	// find squares in every color plane of the image
+    for (int c = 0; c < 3; c++) {
+        int ch[] = {c, 0};
+        cv::mixChannels(&WorkFrame, 1, &gray0, 1, ch, 1);
+
+		// try several threshold levels
+        //const int threshold_level = 2;
+        //for (int l = 0; l < threshold_level; l++) {
+            // Use Canny instead of zero threshold level!
+            // Canny helps to catch squares with gradient shading
+            //if (l == 0) {
+                cv::Canny(gray0, gray, 10, 20, 3); //
+                
+                // Dilate helps to remove potential holes between edge segments
+                cv::dilate(gray, gray, cv::Mat(), cv::Point(-1,-1));
+            //} else {
+            //    gray = gray0 >= (l+1) * 255 / threshold_level;
+            //}
+            
+            // Find contours and store them in a list
+            cv::findContours(gray, contours, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
+            
+            // Test contours
+            std::vector<cv::Point> approx;
+            for (size_t i = 0; i < contours.size(); i++) {
+                // approximate contour with accuracy proportional
+                // to the contour perimeter
+				std::vector<cv::Point> hull;
+				cv::convexHull(contours[i], hull, true);
+				double area = fabs(cv::contourArea(hull));
+				if (area > max_area && area > smallest_area) {
+					double peri = cv::arcLength(hull, true);
+					cv::approxPolyDP(hull, approx, 0.02 * peri, true);
+					if (approx.size() == 4) {
+						// sort the polygon's corners
+						cv::Point swap(0, 0);
+						sort(approx.begin(), approx.end(), comp_vert);
+						if (approx[0].x > approx[1].x) {
+							swap = approx[0];
+							approx[0] = approx[1];
+							approx[1] = swap;
+						}
+						if (approx[2].x < approx[3].x) {
+							swap = approx[2];
+							approx[2] = approx[3];
+							approx[3] = swap;
+						}
+						// use only appropriate polygons
+						double len1 = norm(approx[1] - approx[0]), 
+							len2 = norm(approx[2] - approx[1]), 
+							len3 = norm(approx[3] - approx[2]), 
+							len4 = norm(approx[0] - approx[3]);
+						if (len1 > w8 &&
+							len2 > h8 &&
+							len3 > w8 &&
+							len4 > h8 &&
+							abs(len1 - len3) < ((len1 + len3) / 4) &&
+							abs(len2 - len4) < ((len2 + len4) / 4) &&
+							(abs(width  - len1) > w16 &&
+							 abs(width  - len3) > w16 ||
+							 abs(height - len2) > h16 &&
+							 abs(height - len4) > h16)) {
+
+							double maxCosine = 0;
+                    
+							for (int j = 2; j < 5; j++) {
+								double cosine = fabs(angle(approx[j%4], approx[j-2], approx[j-1]));
+								maxCosine = MAX(maxCosine, cosine);
+							}
+                    
+							if (maxCosine < 0.3) {
+								points = approx;
+								max_area = area;
+								wdth = round((len1 + len3) / 2);
+								hght = round((len2 + len4) / 2);
+							}
+
+						}
+					}
+				}
+            }
+        //}
+
+    }
+	if (points.size() == 4) {
+		m_prevPoints = points;
+		m_prevWdth = wdth;
+		m_prevHght = hght;
+	} else if (m_prevPoints.size() == 4) {
+		points = m_prevPoints;
+		wdth = m_prevWdth;
+		hght = m_prevHght;
+		m_prevPoints.clear();
+		m_prevWdth = 0;
+		m_prevHght = 0;
+	} else {
+		points.clear();
+	}
+	if (points.size() == 4 && wdth > 0 && hght > 0) {
+		// draw approx only if it has 4 corners
+		std::vector<cv::Point> approx2;
+		std::vector<cv::Point2f> pointsf;
+
+		for (size_t k = 0; k < points.size(); k++) {
+			cv::Point pt2(round((double)points[k].x / scale / 2.0), round((double)points[k].y / scale / 2.0));
+			approx2.insert(approx2.begin(), pt2);
+			cv::Point2f pt((double)points[k].x / scale,(double)points[k].y / scale);
+			pointsf.push_back(pt);
 		}
-		else {
-			approx.clear();
-		}
-		if (approx.size() == 4) {
-			// draw approx only if it has 4 corners
-			std::vector<cv::Point> approx2;
-			for (size_t k = 0; k < approx.size(); k++) {
-				cv::Point pt2(approx[k].x / 2, approx[k].y / 2);
-				approx2.insert(approx2.begin(), pt2);
+		if (m_bDoClip) {
+			// define the destination image
+			cv::Mat result = cv::Mat::zeros(round((double)hght / scale), round((double)wdth / scale), image.type());
+			// corners of the destination image
+			std::vector<cv::Point2f> resultPolygon;
+			resultPolygon.push_back(cv::Point2f(0, 0));
+			resultPolygon.push_back(cv::Point2f(result.cols - 1, 0));
+			resultPolygon.push_back(cv::Point2f(result.cols - 1, result.rows - 1));
+			resultPolygon.push_back(cv::Point2f(0, result.rows - 1));
+
+
+			// get transformation matrix
+			cv::Mat transmtx = cv::getPerspectiveTransform(pointsf, resultPolygon);
+			// apply perspective transformation
+			cv::warpPerspective(image, result, transmtx, result.size());
+
+			if (m_nRotation) {
+				cv::Point2f pt(result.cols/2.0, result.rows/2.0);
+				cv::Mat r = cv::getRotationMatrix2D(pt, m_nRotation*1.0, 1.0);
+				cv::warpAffine(result, image, r, cv::Size(result.cols, result.rows));
+			} else {
+				image = result;
 			}
-			std::vector<std::vector<cv::Point>> outContours2;
-			outContours2.insert(outContours2.begin(), approx2);
-
-			cv::Mat OutputUV(m_imageHeightInPixels / 2, m_imageWidthInPixels / 2,
-				CV_8UC2, pDest + m_imageHeightInPixels*lDestStride, lDestStride);
-			cv::drawContours(OutputUV, outContours2, -1, cv::Scalar(43, 31), 2);
+			ReturnProperty(image);
 		}
+		
+		std::vector<std::vector<cv::Point>> outContours2;
+		outContours2.insert(outContours2.begin(), approx2);
+
+		cv::Mat OutputUV(m_imageHeightInPixels / 2, m_imageWidthInPixels / 2,
+			CV_8UC2, pDest + m_imageHeightInPixels*lDestStride, lDestStride);
+		cv::drawContours(OutputUV, outContours2, -1, cv::Scalar(43, 31), 2);
 	}
 
-    // Set the data size on the output buffer.
-    hr = pOut->SetCurrentLength(m_cbImageSize);
+	// Set the data size on the output buffer.
+	hr = pOut->SetCurrentLength(m_cbImageSize);
 
     return hr;
+}
+
+//-------------------------------------------------------------------
+// ReturnProperty
+// Returns the image data to via PropertySet
+//-------------------------------------------------------------------
+HRESULT ImageClipping::ReturnProperty(cv::Mat& image)
+{
+	HRESULT hr = S_OK;
+
+	if (!m_pSetting ||
+		!(image.rows > m_imageHeightInPixels / 8 && image.cols > m_imageWidthInPixels / 8)) {
+		return (HRESULT)-1;
+	}
+	std::vector<int> compression_params;
+	compression_params.push_back(cv::IMWRITE_JPEG_QUALITY);
+	compression_params.push_back(m_nQuality);
+
+	std::vector<uchar> buf;
+	bool bCv = cv::imencode(".jpg", image, buf, compression_params);
+	if (!bCv) {
+		return (HRESULT)-1;
+	}
+
+	ComPtr<ABI::Windows::Security::Cryptography::ICryptographicBufferStatics> cryptBuffer;
+	HSTRING cryptBufferClassId = Wrappers::HStringReference(RuntimeClass_Windows_Security_Cryptography_CryptographicBuffer).Get();
+	hr = ABI::Windows::Foundation::GetActivationFactory(cryptBufferClassId, &cryptBuffer);
+	if (!SUCCEEDED(hr)) {
+		return hr;
+	}
+
+	ABI::Windows::Storage::Streams::IBuffer *buffer;
+	hr = cryptBuffer->CreateFromByteArray(buf.size(), buf.data(), &buffer);
+	if (!SUCCEEDED(hr)) {
+		return hr;
+	}
+
+	HSTRING value = NULL;
+	hr = cryptBuffer->EncodeToBase64String(buffer, &value);
+	if (!SUCCEEDED(hr)) {
+		return hr;
+	}
+
+	HSTRING key;
+	hr = WindowsCreateString(L"{698649BE-8EAE-4551-A4CB-2FA79A4E1E80}", 38, &key);
+	if (!SUCCEEDED(hr)) {
+		return hr;
+	}
+
+	ComPtr<ABI::Windows::Foundation::IPropertyValueStatics> spPropVal;
+	HSTRING propValClassId = Wrappers::HStringReference(RuntimeClass_Windows_Foundation_PropertyValue).Get();
+	hr = ABI::Windows::Foundation::GetActivationFactory(propValClassId, &spPropVal);
+	if (!SUCCEEDED(hr)) {
+		return hr;
+	}
+
+	ComPtr<IInspectable> spValueInsp;
+	boolean replaced;
+
+	hr = spPropVal->CreateString(value, &spValueInsp);
+	if (!SUCCEEDED(hr)) {
+		return hr;
+	}
+
+	if (m_pSetting) {
+		hr = m_pSetting->Insert(key, spValueInsp.Get(), &replaced);
+	} else {
+		return (HRESULT)-1;
+	}
+
+	return hr;
 }
 
 
@@ -1529,162 +1732,10 @@ HRESULT GetDefaultStride(IMFMediaType *pType, LONG *plStride)
     return hr;
 }
 
-bool comparator(cv::Point2f a, cv::Point2f b)
-{
-	return a.x < b.x;
-}
-
-
-BOOL ImageClipping::RectifyAndCut(std::vector<cv::Point2f> approx)
-{
-	BOOL ret = false;
-	size_t sz = approx.size();
-	if (sz == 4) {
-		// sort the polygon's corners
-		cv::Point2f center(0, 0);
-		for (int i = 0; i < sz; i++) {
-			center += approx[i];
-		}
-		center *= (1. / sz);
-		std::vector<cv::Point2f> top, bot;
-		for (int i = 0; i < sz; i++) {
-			if ((approx[i].y < center.y && top.size() < 2) || bot.size() == 2)
-				top.push_back(approx[i]);
-			else
-				bot.push_back(approx[i]);
-		}
-		sort(top.begin(), top.end(), comparator);
-		sort(bot.begin(), bot.end(), comparator);
-		approx.clear();
-		if (top[1].x - top[0].x > m_imageWidthInPixels / 8 &&
-			bot[1].x - bot[0].x > m_imageWidthInPixels / 8 &&
-			bot[0].y - top[0].y > m_imageHeightInPixels / 8 &&
-			bot[1].y - top[1].y > m_imageHeightInPixels / 8) {
-			approx.push_back(top[0]);
-			approx.push_back(top[1]);
-			approx.push_back(bot[1]);
-			approx.push_back(bot[0]);
-
-			if (m_bDoClip) {
-				// find dimensions for the destination image;
-				// don't do it via boundingRect(thePolygon),
-				// which maybe results in distortions,
-				// that are less severe when taking the averages of opposite sides
-				std::vector<cv::Point2f> side1, side2, side3, side4;
-				side1.push_back(top[0]);
-				side1.push_back(top[1]);
-				side2.push_back(top[1]);
-				side2.push_back(bot[1]);
-				side3.push_back(bot[1]);
-				side3.push_back(bot[0]);
-				side4.push_back(bot[0]);
-				side4.push_back(top[0]);
-				double len1 = arcLength(side1, false)
-					, len2 = arcLength(side2, false)
-					, len3 = arcLength(side3, false)
-					, len4 = arcLength(side4, false);
-				int wdth = round((len1 + len3) / 2)
-					, hght = round((len2 + len4) / 2);
-
-
-				// define the destination image
-				cv::Mat result = cv::Mat::zeros(hght, wdth, m_prevImage.type());
-				// corners of the destination image
-				std::vector<cv::Point2f> resultPolygon;
-				resultPolygon.push_back(cv::Point2f(0, 0));
-				resultPolygon.push_back(cv::Point2f(result.cols, 0));
-				resultPolygon.push_back(cv::Point2f(result.cols, result.rows));
-				resultPolygon.push_back(cv::Point2f(0, result.rows));
-
-
-				// get transformation matrix
-				cv::Mat transmtx = getPerspectiveTransform(approx, resultPolygon);
-				// apply perspective transformation
-				warpPerspective(m_prevImage, result, transmtx, result.size());
-
-
-				if (m_nRotation) {
-					cv::Point2f pt(result.cols/2.0, result.rows/2.0);
-					cv::Mat r = getRotationMatrix2D(pt, m_nRotation*1.0, 1.0);
-					warpAffine(result, m_prevImage, r, cv::Size(result.cols, result.rows));
-				} else {
-					m_prevImage = result;
-				}
-			}
-			ret = true;
-		}
-	}
-	return ret;
-}
-
-
-//-------------------------------------------------------------------
-// ReturnProperty
-// Returns the image data to via PropertySet
-//-------------------------------------------------------------------
-HRESULT ImageClipping::ReturnProperty()
-{
-	HRESULT hr = S_OK;
-
-	if (!m_pSetting || m_prevApprox.size() != 4 ||
-		!(m_prevImage.rows > m_imageHeightInPixels / 8 && m_prevImage.cols > m_imageWidthInPixels / 8)) {
-		return (HRESULT)-1;
-	}
-	std::vector<int> compression_params;
-	compression_params.push_back(cv::IMWRITE_JPEG_QUALITY);
-	compression_params.push_back(m_nQuality);
-
-	std::vector<uchar> buf;
-	bool bCv = cv::imencode(".jpg", m_prevImage, buf, compression_params);
-	if (!bCv) {
-		return (HRESULT)-1;
-	}
-
-	ComPtr<ABI::Windows::Security::Cryptography::ICryptographicBufferStatics> cryptBuffer;
-	HSTRING cryptBufferClassId = Wrappers::HStringReference(RuntimeClass_Windows_Security_Cryptography_CryptographicBuffer).Get();
-	hr = ABI::Windows::Foundation::GetActivationFactory(cryptBufferClassId, &cryptBuffer);
-	if (!SUCCEEDED(hr)) {
-		return hr;
-	}
-
-	ABI::Windows::Storage::Streams::IBuffer *buffer;
-	hr = cryptBuffer->CreateFromByteArray(buf.size(), buf.data(), &buffer);
-	if (!SUCCEEDED(hr)) {
-		return hr;
-	}
-
-	HSTRING value = NULL;
-	hr = cryptBuffer->EncodeToBase64String(buffer, &value);
-	if (!SUCCEEDED(hr)) {
-		return hr;
-	}
-
-	HSTRING key;
-	hr = WindowsCreateString(L"{698649BE-8EAE-4551-A4CB-2FA79A4E1E80}", 38, &key);
-	if (!SUCCEEDED(hr)) {
-		return hr;
-	}
-
-	ComPtr<ABI::Windows::Foundation::IPropertyValueStatics> spPropVal;
-	HSTRING propValClassId = Wrappers::HStringReference(RuntimeClass_Windows_Foundation_PropertyValue).Get();
-	hr = ABI::Windows::Foundation::GetActivationFactory(propValClassId, &spPropVal);
-	if (!SUCCEEDED(hr)) {
-		return hr;
-	}
-
-	ComPtr<IInspectable> spValueInsp;
-	boolean replaced;
-
-	hr = spPropVal->CreateString(value, &spValueInsp);
-	if (!SUCCEEDED(hr)) {
-		return hr;
-	}
-
-	if (m_pSetting) {
-		hr = m_pSetting->Insert(key, spValueInsp.Get(), &replaced);
-	} else {
-		return (HRESULT)-1;
-	}
-
-	return hr;
+double ImageClipping::angle( cv::Point pt1, cv::Point pt2, cv::Point pt0 ) {
+    double dx1 = pt1.x - pt0.x;
+    double dy1 = pt1.y - pt0.y;
+    double dx2 = pt2.x - pt0.x;
+    double dy2 = pt2.y - pt0.y;
+    return (dx1*dx2 + dy1*dy2)/sqrt((dx1*dx1 + dy1*dy1)*(dx2*dx2 + dy2*dy2) + 1e-10);
 }

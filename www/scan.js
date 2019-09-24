@@ -10,7 +10,7 @@ module.exports = {
 			}
 			return value;
 		}
-		argscheck.checkArgs('fFO', 'ClippingCamera.getPicture', arguments);
+		argscheck.checkArgs('fFO', 'scanDoc', arguments);
         options = options || {};
 		options.sourceType = (options.sourceType !== 1) ? 0 : options.sourceType;
 		options.fileName = (typeof options.fileName === "string") ? options.fileName : "image";
