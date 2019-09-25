@@ -5,7 +5,7 @@
   <description>Cordova Document Scanner Plugin</description>
   <keywords>cordova,camera,document,scan</keywords>
   <engines>
-    <engine name="cordova-android" version=">=6.4.0" />
+    <engine name="cordova-android" version=">=6.0.0" />
   </engines>
   <asset src="www/scan.js" target="js/scan.js"/>
   <js-module src="www/scan.js" name="scan">
