@@ -118,31 +118,46 @@ function videoPreviewRotationLookup(displayOrientation, isMirrored) {
      * Converts SimpleOrientation to a VideoRotation to remove difference between camera sensor orientation
      * and video orientation
      * @param  {number} orientation - Windows.Devices.Sensors.SimpleOrientation
+     * @param  {number} addRotation - additional rotation in degree (90° steps)
      * @return {number} - Windows.Media.Capture.VideoRotation
      */
-    function orientationToRotation(orientation) {
+    function orientationToRotation(orientation, addRotation) {
         // VideoRotation enumerable and BitmapRotation enumerable have the same values
         // https://msdn.microsoft.com/en-us/library/windows/apps/windows.media.capture.videorotation.aspx
         // https://msdn.microsoft.com/en-us/library/windows/apps/windows.graphics.imaging.bitmaprotation.aspx
 
+        var degree = (addRotation || 0) % 360;
         switch (orientation) {
-            // portrait
+        // portrait
         case Windows.Devices.Sensors.SimpleOrientation.notRotated:
-            return Windows.Media.Capture.VideoRotation.clockwise90Degrees;
+            degree += 90;
+            break;
         // landscape
         case Windows.Devices.Sensors.SimpleOrientation.rotated90DegreesCounterclockwise:
-            return Windows.Media.Capture.VideoRotation.none;
+            break;
         // portrait-flipped (not supported by WinPhone Apps)
         case Windows.Devices.Sensors.SimpleOrientation.rotated180DegreesCounterclockwise:
-            // Falling back to portrait default
-            return Windows.Media.Capture.VideoRotation.clockwise90Degrees;
+            degree += 90;
+            break;
         // landscape-flipped
         case Windows.Devices.Sensors.SimpleOrientation.rotated270DegreesCounterclockwise:
-            return Windows.Media.Capture.VideoRotation.clockwise180Degrees;
+            degree += 180;
+            break;
         // faceup & facedown
         default:
             // Falling back to portrait default
+            degree += 90;
+        }
+
+        switch (degree) {
+        case 90:
             return Windows.Media.Capture.VideoRotation.clockwise90Degrees;
+        case 180:
+            return Windows.Media.Capture.VideoRotation.clockwise180Degrees;
+        case 270:
+            return Windows.Media.Capture.VideoRotation.clockwise270Degrees;
+        default:
+            return Windows.Media.Capture.VideoRotation.none;
         }
     }
 
@@ -487,7 +502,7 @@ CameraUI.prototype.capturing = function (usePropertySet) {
     });
 };
 
-CameraUI.prototype.capturePhoto = function (lowLagPhotoCapture, bDontClip, useEffectFilter, quality, fileName, returnBase64, convertToGrayscale) {
+CameraUI.prototype.capturePhoto = function (lowLagPhotoCapture, bDontClip, useEffectFilter, quality, fileName, returnBase64, convertToGrayscale, rotationDegree) {
     if (this._captureLaterPromise) {
         this._captureLaterPromise.cancel();
     }
@@ -497,7 +512,7 @@ CameraUI.prototype.capturePhoto = function (lowLagPhotoCapture, bDontClip, useEf
         var that = this;
         if (!bDontClip && !(this._points && this._points.length === 8)) {
             this._captureLaterPromise = WinJS.Promise.timeout(CHECK_PLAYING_TIMEOUT).then(function() {
-                return that.capturePhoto(lowLagPhotoCapture, bDontClip, useEffectFilter, quality, fileName, returnBase64, convertToGrayscale);
+                return that.capturePhoto(lowLagPhotoCapture, bDontClip, useEffectFilter, quality, fileName, returnBase64, convertToGrayscale, rotationDegree);
             });
             return this._captureLaterPromise;
         }
@@ -600,7 +615,7 @@ CameraUI.prototype.capturePhoto = function (lowLagPhotoCapture, bDontClip, useEf
                 var currentOrientation = displayInformation.currentOrientation;
 
                 // We need to rotate the photo wrt sensor orientation
-                enc.bitmapTransform.rotation = orientationToRotation(currentOrientation);
+                enc.bitmapTransform.rotation = orientationToRotation(currentOrientation, rotationDegree);
                 return enc.flushAsync();
             }).then(function () {
                 return tempFolder.createFileAsync(fileName, OptUnique);
@@ -1000,14 +1015,13 @@ module.exports = {
                             captureCanvas.height = height;
                             captureCanvas.rotDegree = rotDegree;
                             if (captureCanvas.style) {
-                                if (rotAdd) {
-                                    rotAdd = rotAdd % 360;
-                                    captureCanvas.style.transform = "rotate(" + rotAdd.toString() + "deg)";
-                                }
                                 captureCanvas.style.left = left.toString() + "px";
                                 captureCanvas.style.top = top.toString() + "px";
                                 captureCanvas.style.width = width.toString() + "px";
                                 captureCanvas.style.height = height.toString() + "px";
+                                if (rotAdd) {
+                                    captureCanvas.style.transform = "rotate(" + rotAdd.toString() + "deg)";
+                                }
                             }
                         }
                     }
@@ -1207,7 +1221,7 @@ module.exports = {
             if (getUseEffectFilter()) {
 			  addEffectToImageStream(true);
 		    }
-            camera && camera.capturePhoto(lowLagPhotoCapture, getDontClip(), getUseEffectFilter(), getQuality(), getFileName(), getReturnBase64(), getConvertToGrayscale());
+            camera && camera.capturePhoto(lowLagPhotoCapture, getDontClip(), getUseEffectFilter(), getQuality(), getFileName(), getReturnBase64(), getConvertToGrayscale(), getRotationDegree());
         }
 
         function photoActionHot() {
