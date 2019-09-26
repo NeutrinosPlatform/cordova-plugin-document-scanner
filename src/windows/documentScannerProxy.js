@@ -360,10 +360,57 @@ CameraUI.prototype.release = function(eventArgs) {
     }
 };
 
+CameraUI.prototype.drawClippingOverlay = function() {
+    // draws the result polygon over the video preview
+    if (this._canvas) {
+        var c2 = this._canvas.getContext('2d');
+        c2.clearRect(0, 0, this._canvas.width, this._canvas.height);
+        if (this._points && this._points.length === 8 && this._videoWidth > 0 && this._videoHeight) {
+            var i;
+            var viewResult = [];
+            switch (this._canvas.rotDegree) {
+            case 90:
+                for (i = 0; i < 4; i++) {
+                    viewResult.push((1 - this._points[i * 2 + 1] / this._videoHeight) * this._canvas.width);
+                    viewResult.push(this._points[i * 2]  / this._videoWidth * this._canvas.height);
+                };
+                break;
+            case 180:
+                for (i = 0; i < 4; i++) {
+                    viewResult.push((1 - this._points[i * 2] / this._videoWidth) * this._canvas.width);
+                    viewResult.push((1 - this._points[i * 2 + 1] / this._videoHeight) * this._canvas.height);
+                };
+                break;
+            case 270:
+                for (i = 0; i < 4; i++) {
+                    viewResult.push(this._points[i * 2 + 1] / this._videoHeight * this._canvas.width);
+                    viewResult.push((1 - this._points[i * 2]  / this._videoWidth ) * this._canvas.height);
+                };
+                break;
+            default:
+                for (i = 0; i < 4; i++) {
+                    viewResult.push(this._points[i * 2] / this._videoWidth * this._canvas.width);
+                    viewResult.push(this._points[i * 2 + 1] / this._videoHeight * this._canvas.height);
+                };
+            }
+            c2.fillStyle = this._inCapturePhoto ? "rgba(128,255,128,0.50)" : "rgba(128,255,128,0.10)";
+            c2.strokeStyle = "#0f0";
+            c2.beginPath();
+            c2.moveTo(viewResult[0], viewResult[1]);
+            c2.lineTo(viewResult[2], viewResult[3]);
+            c2.lineTo(viewResult[4], viewResult[5]);
+            c2.lineTo(viewResult[6], viewResult[7]);
+            c2.closePath();
+            c2.fill();
+            c2.stroke();
+        }
+    }
+}
+
 CameraUI.prototype.onFrameArrived = function() {
     //console.log('onFrameArrived called...');
     this._hasFrameArrived = true;
-    if (this._reader && this._helper && this._canvas && !this._inCapturePhoto) {
+    if (this._reader && this._helper && !this._inCapturePhoto) {
         var result = null;
         var reader = this._reader;
         if (reader.isPureJS) {
@@ -387,50 +434,9 @@ CameraUI.prototype.onFrameArrived = function() {
             } catch (e) {
             }
         }
-        // draws the result polygon over the video preview
-        var c2 = this._canvas.getContext('2d');
-        c2.clearRect(0, 0, this._canvas.width, this._canvas.height);
-        if (result && result.length === 8 && this._videoWidth > 0 && this._videoHeight) {
-            var i;
-            var viewResult = [];
-            switch (this._canvas.rotDegree) {
-                case 90:
-                for (i = 0; i < 4; i++) {
-                    viewResult.push((1 - result[i * 2 + 1] / this._videoHeight) * this._canvas.width);
-                    viewResult.push(result[i * 2]  / this._videoWidth * this._canvas.height);
-                };
-                break;
-                case 180:
-                for (i = 0; i < 4; i++) {
-                    viewResult.push((1 - result[i * 2] / this._videoWidth) * this._canvas.width);
-                    viewResult.push((1 - result[i * 2 + 1] / this._videoHeight) * this._canvas.height);
-                };
-                break;
-                case 270:
-                for (i = 0; i < 4; i++) {
-                    viewResult.push(result[i * 2 + 1] / this._videoHeight * this._canvas.width);
-                    viewResult.push((1 - result[i * 2]  / this._videoWidth ) * this._canvas.height);
-                };
-                break;
-                default:
-                for (i = 0; i < 4; i++) {
-                    viewResult.push(result[i * 2] / this._videoWidth * this._canvas.width);
-                    viewResult.push(result[i * 2 + 1] / this._videoHeight * this._canvas.height);
-                };
-            }
-            c2.fillStyle = "rgba(255,0,0,0.25)";
-            c2.strokeStyle = "#800";
-            c2.beginPath();
-            c2.moveTo(viewResult[0], viewResult[1]);
-            c2.lineTo(viewResult[2], viewResult[3]);
-            c2.lineTo(viewResult[4], viewResult[5]);
-            c2.lineTo(viewResult[6], viewResult[7]);
-            c2.closePath();
-            c2.fill();
-            c2.stroke();
-        }
         this._points = result;
     }
+    this.drawClippingOverlay();
 };
 
 /**
@@ -480,7 +486,7 @@ CameraUI.prototype.capturing = function (usePropertySet) {
     });
 };
 
-CameraUI.prototype.capturePhoto = function (bDontClip, useEffectFilter, quality, fileName, returnBase64, convertToGrayscale) {
+CameraUI.prototype.capturePhoto = function (lowLagPhotoCapture, bDontClip, useEffectFilter, quality, fileName, returnBase64, convertToGrayscale) {
     if (this._captureLaterPromise) {
         this._captureLaterPromise.cancel();
     }
@@ -490,11 +496,12 @@ CameraUI.prototype.capturePhoto = function (bDontClip, useEffectFilter, quality,
         var that = this;
         if (!bDontClip && !(this._points && this._points.length === 8)) {
             this._captureLaterPromise = WinJS.Promise.timeout(CHECK_PLAYING_TIMEOUT).then(function() {
-                return that.capturePhoto(bDontClip, useEffectFilter, quality, fileName, returnBase64, convertToGrayscale);
+                return that.capturePhoto(lowLagPhotoCapture, bDontClip, useEffectFilter, quality, fileName, returnBase64, convertToGrayscale);
             });
             return this._captureLaterPromise;
         }
         this._inCapturePhoto = true;
+        this.drawClippingOverlay();
         this._captureStarted = false;
         var width = this._videoWidth;
         var height = this._videoHeight;
@@ -515,64 +522,76 @@ CameraUI.prototype.capturePhoto = function (bDontClip, useEffectFilter, quality,
         return new WinJS.Promise(function (complete) {
             var decoder = null;
             var outputBitmap = null;
-            var encodingProperties = Windows.Media.MediaProperties.ImageEncodingProperties.createJpeg();
-            var photoStream = new Windows.Storage.Streams.InMemoryRandomAccessStream();
             var finalStream = new Windows.Storage.Streams.InMemoryRandomAccessStream();
-            return capture.capturePhotoToStreamAsync(encodingProperties, photoStream).then(function () {
-                return Windows.Graphics.Imaging.BitmapDecoder.createAsync(photoStream);
-            }).then(function (dec) {
-                decoder = dec;
-                if (bDontClip) {
-                    return WinJS.Promise.as();
-                } else {
-                    return dec.getSoftwareBitmapAsync();
-                }
-            }).then(function (originalBitmap) {
-                finalStream.size = 0; // BitmapEncoder requires the output stream to be empty
-                if (!bDontClip && originalBitmap) {
-                    var xScale = originalBitmap.pixelWidth / width;
-                    var yScale = originalBitmap.pixelHeight / height;
-                    var p0 = {
-                        x: Math.floor(points[0] * xScale + 0.5),
-                        y: Math.floor(points[1] * yScale + 0.5)
-                    };
-                    var p1 = {
-                        x: Math.floor(points[2] * xScale + 0.5),
-                        y: Math.floor(points[3] * yScale + 0.5)
-                    };
-                    var p2 = {
-                        x: Math.floor(points[4] * xScale + 0.5),
-                        y: Math.floor(points[5] * yScale + 0.5)
-                    };
-                    var p3 = {
-                        x: Math.floor(points[6] * xScale + 0.5),
-                        y: Math.floor(points[7] * yScale + 0.5)
-                    };
-                    var len0 = Math.sqrt((p1.x - p0.x) * (p1.x - p0.x) + (p1.y - p0.y) * (p1.y - p0.y));
-                    var len1 = Math.sqrt((p2.x - p1.x) * (p2.x - p1.x) + (p2.y - p1.y) * (p2.y - p1.y));
-                    var len2 = Math.sqrt((p3.x - p2.x) * (p3.x - p2.x) + (p3.y - p2.y) * (p3.y - p2.y));
-                    var len3 = Math.sqrt((p0.x - p3.x) * (p0.x - p3.x) + (p0.y - p3.y) * (p0.y - p3.y));
-                    var outputWidth = Math.round((len0 + len2) / 2);
-                    var outputHeight = Math.round((len1 + len3) / 2);
-                    outputBitmap = new Windows.Graphics.Imaging.SoftwareBitmap(
-                        Windows.Graphics.Imaging.BitmapPixelFormat.bgra8,
-                        outputWidth,
-                        outputHeight,
-                        Windows.Graphics.Imaging.BitmapAlphaMode.premultiplied);
-                    var newPoints = [p0.x, p0.y, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y];
-                    try {
-                        helper.clipToPoints(originalBitmap, outputBitmap, newPoints);
-                        return Windows.Graphics.Imaging.BitmapEncoder.createAsync(Windows.Graphics.Imaging.BitmapEncoder.jpegEncoderId, finalStream);
-                    } catch (e) {
-                        // fallback: don't clip
-                        outputBitmap = null;
-                        return Windows.Graphics.Imaging.BitmapEncoder.createForTranscodingAsync(finalStream, decoder);
+            var photoStream = null;
+            var promise;
+            if (lowLagPhotoCapture) {
+                promise = lowLagPhotoCapture.captureAsync().then(function(capturedPhoto) {
+                    return capturedPhoto && capturedPhoto.frame && capturedPhoto.frame.softwareBitmap;
+                });
+            } else {
+                var encodingProperties = Windows.Media.MediaProperties.ImageEncodingProperties.createJpeg();
+                photoStream = new Windows.Storage.Streams.InMemoryRandomAccessStream();
+                promise = capture.capturePhotoToStreamAsync(encodingProperties, photoStream).then(function() {
+                    return Windows.Graphics.Imaging.BitmapDecoder.createAsync(photoStream);
+                }).then(function (dec) {
+                    if (bDontClip) {
+                        decoder = dec;
+                        return WinJS.Promise.as();
+                    } else {
+                        return dec.getSoftwareBitmapAsync();
                     }
-                } else {
+                });
+            }
+            return promise.then(function (originalBitmap) {
+                finalStream.size = 0; // BitmapEncoder requires the output stream to be empty
+                if (decoder) {
                     return Windows.Graphics.Imaging.BitmapEncoder.createForTranscodingAsync(finalStream, decoder);
+                } else {
+                    if (bDontClip) {
+                        outputBitmap = originalBitmap;
+                    } else {
+                        var xScale = originalBitmap.pixelWidth / width;
+                        var yScale = originalBitmap.pixelHeight / height;
+                        var p0 = {
+                            x: Math.floor(points[0] * xScale + 0.5),
+                            y: Math.floor(points[1] * yScale + 0.5)
+                        };
+                        var p1 = {
+                            x: Math.floor(points[2] * xScale + 0.5),
+                            y: Math.floor(points[3] * yScale + 0.5)
+                        };
+                        var p2 = {
+                            x: Math.floor(points[4] * xScale + 0.5),
+                            y: Math.floor(points[5] * yScale + 0.5)
+                        };
+                        var p3 = {
+                            x: Math.floor(points[6] * xScale + 0.5),
+                            y: Math.floor(points[7] * yScale + 0.5)
+                        };
+                        var len0 = Math.sqrt((p1.x - p0.x) * (p1.x - p0.x) + (p1.y - p0.y) * (p1.y - p0.y));
+                        var len1 = Math.sqrt((p2.x - p1.x) * (p2.x - p1.x) + (p2.y - p1.y) * (p2.y - p1.y));
+                        var len2 = Math.sqrt((p3.x - p2.x) * (p3.x - p2.x) + (p3.y - p2.y) * (p3.y - p2.y));
+                        var len3 = Math.sqrt((p0.x - p3.x) * (p0.x - p3.x) + (p0.y - p3.y) * (p0.y - p3.y));
+                        var outputWidth = Math.round((len0 + len2) / 2);
+                        var outputHeight = Math.round((len1 + len3) / 2);
+                        outputBitmap = new Windows.Graphics.Imaging.SoftwareBitmap(
+                            Windows.Graphics.Imaging.BitmapPixelFormat.bgra8,
+                            outputWidth,
+                            outputHeight,
+                            Windows.Graphics.Imaging.BitmapAlphaMode.premultiplied);
+                        var newPoints = [p0.x, p0.y, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y];
+                        try {
+                            helper.clipToPoints(originalBitmap, outputBitmap, newPoints);
+                        } catch (e) {
+                            // fallback: don't clip
+                            outputBitmap = originalBitmap;
+                        }
+                    }
+                    return Windows.Graphics.Imaging.BitmapEncoder.createAsync(Windows.Graphics.Imaging.BitmapEncoder.jpegEncoderId, finalStream);
                 }
             }).then(function (enc) {
-                if (!bDontClip && outputBitmap) {
+                if (outputBitmap) {
                     enc.setSoftwareBitmap(outputBitmap);
                 }
                 var displayInformation =
@@ -591,12 +610,16 @@ CameraUI.prototype.capturePhoto = function (bDontClip, useEffectFilter, quality,
                 return Windows.Storage.Streams.RandomAccessStream.copyAndCloseAsync(finalStream,
                     fileStream);
             }).done(function () {
-                photoStream.close();
+                if (photoStream) {
+                    photoStream.close();
+                }
                 finalStream.close();
                 complete(tempCapturedFile);
             },
             function () {
-                photoStream.close();
+                if (photoStream) {
+                    photoStream.close();
+                }
                 finalStream.close();
                 throw new Error("An error has occured while capturing the photo.");
             });
@@ -681,6 +704,7 @@ module.exports = {
             photoButton,
             photoButtonBkg,
             capture,
+            lowLagPhotoCapture,
             camera,
             videoProps,
             cancelPromise,
@@ -1182,7 +1206,7 @@ module.exports = {
             if (getUseEffectFilter()) {
 			  addEffectToImageStream(true);
 		    }
-            camera && camera.capturePhoto(getDontClip(), getUseEffectFilter(), getQuality(), getFileName(), getReturnBase64(), getConvertToGrayscale());
+            camera && camera.capturePhoto(lowLagPhotoCapture, getDontClip(), getUseEffectFilter(), getQuality(), getFileName(), getReturnBase64(), getConvertToGrayscale());
         }
 
         function photoActionHot() {
@@ -1227,13 +1251,11 @@ module.exports = {
                     throw e;
                 }
                 captureInitSettings.videoDeviceId = id;
-                captureInitSettings.sharingMode = Windows.Media.Capture.MediaCaptureSharingMode &&
-                    Windows.Media.Capture.MediaCaptureSharingMode.exclusiveControl;
+                captureInitSettings.sharingMode = Windows.Media.Capture.MediaCaptureSharingMode.exclusiveControl;
                 captureInitSettings.streamingCaptureMode = Windows.Media.Capture.StreamingCaptureMode.video;
 
                 // use of SoftwareBitmap member in captured frames
-                captureInitSettings.memoryPreference = Windows.Media.Capture.MediaCaptureMemoryPreference &&
-                    Windows.Media.Capture.MediaCaptureMemoryPreference.cpu;
+                captureInitSettings.memoryPreference = Windows.Media.Capture.MediaCaptureMemoryPreference.cpu;
 
                 // try first with photo capture source
                 captureInitSettings.photoCaptureSource = Windows.Media.Capture.PhotoCaptureSource.photo;
@@ -1326,15 +1348,25 @@ module.exports = {
                 }
 
                 if (photoResolution.length > 0) {
-                    return videoDeviceController.setMediaStreamPropertiesAsync(Windows.Media.Capture.MediaStreamType.photo, photoResolution)
-                        .then(function () {
-                            return videoDeviceController.setMediaStreamPropertiesAsync(Windows.Media.Capture.MediaStreamType.videoPreview, videoPreviewResolution);
-                        });
+                    return videoDeviceController.setMediaStreamPropertiesAsync(Windows.Media.Capture.MediaStreamType.photo, photoResolution).then(function () {
+                        return videoDeviceController.setMediaStreamPropertiesAsync(Windows.Media.Capture.MediaStreamType.videoPreview, videoPreviewResolution);
+                    });
                 } else {
                     return videoDeviceController.setMediaStreamPropertiesAsync(Windows.Media.Capture.MediaStreamType.videoPreview, videoPreviewResolution);
                 }
             })
             .then(function () {
+                if (photoProperties) {
+                    var encodingProperties = Windows.Media.MediaProperties.ImageEncodingProperties.createUncompressed(Windows.Media.MediaProperties.MediaPixelFormat.bgra8);
+                    return capture.prepareLowLagPhotoCaptureAsync(encodingProperties).then(function(llc) {
+                        lowLagPhotoCapture = llc;
+                    });
+                } else {
+                    return WinJS.Promise.as();
+                }
+            })
+            .then(function () {
+
                 capturePreview.msZoom = true;
                 capturePreview.src = URL.createObjectURL(capture);
                 capturePreview.play();
@@ -1453,6 +1485,12 @@ module.exports = {
                 camera && camera.stop();
                 camera = null;
 
+                if (lowLagPhotoCapture) {
+                    return lowLagPhotoCapture.finishAsync();
+                } else {
+                    return WinJS.Promise.as();
+                }
+            }).then(function () {
                 if (capture) {
                     try {
                         promise = capture.stopRecordAsync();
