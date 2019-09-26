@@ -395,6 +395,7 @@ CameraUI.prototype.drawClippingOverlay = function() {
             }
             c2.fillStyle = this._inCapturePhoto ? "rgba(128,255,128,0.50)" : "rgba(128,255,128,0.10)";
             c2.strokeStyle = "#0f0";
+            c2.lineWidth = 2;
             c2.beginPath();
             c2.moveTo(viewResult[0], viewResult[1]);
             c2.lineTo(viewResult[2], viewResult[3]);
