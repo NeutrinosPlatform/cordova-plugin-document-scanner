@@ -20,6 +20,8 @@ function onDeviceReady() {
 - Android
 
 - iOS
+
+- Windows Phone 8.1, Windows RT 8.1, Windows 8.1, Windows 10 Mobile, Windows 10
   
 # Installation
 
@@ -132,6 +134,14 @@ Take a photo and retrieve the image's file location. Options need not be passed 
 
  - Android example imageURI returned :- file:///storage/emulated/0/Pictures/1563790575755.jpg
 
+ # Windows Quirks
+
+ - Windows has only document scan via camera for now (Any argument passed will start the camera scan). Document Scan from gallery will be available in future version. Also scanned images aren't saved to the photos library in Windows. 
+
+ - If you don't use use returnBase64, please don't forget to delete the file before next call to scanDoc with the same file name. If a previous file already exists, a new unique fileName is used. 
+
+ - An example file URI obtained from success call back of scanDoc function in an app with given APP_PACKAGE_NAME installed by a user with USER_NAME looks like this C:\\Users\\USER_NAME\\AppData\\Local\\Packages\\APP_PACKAGE_NAME\\TempState\\photo.jpg
+
 # Issues and Fixes
 
 <details>
@@ -184,6 +194,9 @@ Android :- [AndroidScanner](https://github.com/jhansireddy/AndroidScannerDemo) <
 iOS [4.x.x] :- [IRLDocumentScanner](https://github.com/charlymr/IRLDocumentScanner) <br/>
 
 iOS [3.x.x] :- [WeScan](https://github.com/WeTransfer/WeScan)
+
+Windows :- https://opencv.org/opencv-3-1/ <br/> Be aware of that the binary DLLs provided there aren't suitable for Store App deployment. You need to download the source code and build your own binary DLLs with the needed complier and linker flags. The binary DLLs included in this plugin can be used for Store App deployment. <br/>
+
   
 Huge thanks to these authors for making their document scanning native libraries public.
 
