@@ -31,6 +31,17 @@ var PROPERTY_ROTATION = "{698649BE-8EAE-4551-A4CB-2FA79A4E1E72}";
 var PROPERTY_CAPTURE  = "{698649BE-8EAE-4551-A4CB-2FA79A4E1E79}";
 var PROPERTY_RESULT   = "{698649BE-8EAE-4551-A4CB-2FA79A4E1E80}";
 
+var analyticsVersionInfo = Windows.System.Profile.AnalyticsInfo && Windows.System.Profile.AnalyticsInfo.versionInfo;
+var getVersion = function() {
+    return analyticsVersionInfo && analyticsVersionInfo.deviceFamilyVersion;
+}
+var getMajorVersion = function() {
+	var majorVersion = 0;
+	if (analyticsVersionInfo && analyticsVersionInfo.deviceFamilyVersion) {
+		majorVersion = Math.floor(parseInt(analyticsVersionInfo.deviceFamilyVersion) / 0x1000000000000);
+	}
+	return majorVersion;
+}
 var getAppData = function () {
     return Windows.Storage.ApplicationData.current;
 };
@@ -107,7 +118,7 @@ function videoPreviewRotationLookup(displayOrientation, isMirrored) {
      * Converts SimpleOrientation to a VideoRotation to remove difference between camera sensor orientation
      * and video orientation
      * @param  {number} orientation - Windows.Devices.Sensors.SimpleOrientation
-     * @param  {number} addRotation - additional rotation in degree (90° steps)
+     * @param  {number} addRotation - additional rotation in degree (90 degree steps)
      * @return {number} - Windows.Media.Capture.VideoRotation
      */
     function orientationToRotation(orientation, addRotation) {
@@ -497,7 +508,7 @@ CameraUI.prototype.capturePhoto = function (lowLagPhotoCapture, bDontClip, useEf
     }
     if (useEffectFilter) {
 		this._captured = true;
-    } else if (this._capture && this._helper) {
+    } else if (this._capture) {
         var that = this;
         if (!bDontClip && !(this._points && this._points.length === 8)) {
             this._captureLaterPromise = WinJS.Promise.timeout(CHECK_PLAYING_TIMEOUT).then(function() {
@@ -553,7 +564,7 @@ CameraUI.prototype.capturePhoto = function (lowLagPhotoCapture, bDontClip, useEf
                 if (decoder) {
                     return Windows.Graphics.Imaging.BitmapEncoder.createForTranscodingAsync(finalStream, decoder);
                 } else {
-                    if (bDontClip) {
+                    if (bDontClip || !helper) {
                         outputBitmap = originalBitmap;
                     } else {
                         var xScale = originalBitmap.pixelWidth / width;
@@ -696,6 +707,8 @@ module.exports = {
      * 2 dontClip:true|false
      */
     scanDoc: function (success, fail, args) {
+		var version = getMajorVersion();
+
         var captureCanvas,
             capturePreview,
             capturePreviewFrame,
@@ -767,7 +780,7 @@ module.exports = {
         }
 
         var getUseEffectFilter = function() {
-			if (!getDontClip() && typeof OpenCVBridge === "undefined") {
+			if (!getDontClip() && version !== 10) {
 				return true;
 		    } else {
 				return false;
