@@ -250,10 +250,6 @@ function MediaFrameReader (newCapture, newWidth, newHeight) {
 
 }
 
-
-
-
-
 /**
  * The implementation of camera user interface
  *
@@ -313,10 +309,11 @@ CameraUI.prototype.init = function (capture, videoWidth, videoHeight, preview, c
     this._preview = preview;
     this._canvas = canvas;
     this._fail = fail;
-    this._points = null;
+    this._pointsStack = [];
     this._hasFrameArrived = false;
     this._captureLaterPromise = null;
     this._inCapturePhoto = false;
+    this._startTime = 0;
 };
 
 CameraUI.prototype.attach = function(reader) {
@@ -380,32 +377,33 @@ CameraUI.prototype.drawClippingOverlay = function() {
     if (this._canvas) {
         var c2 = this._canvas.getContext('2d');
         c2.clearRect(0, 0, this._canvas.width, this._canvas.height);
-        if (this._points && this._points.length === 8 && this._videoWidth > 0 && this._videoHeight) {
+        var points = this._pointsStack.length > 0 ? this._pointsStack[this._pointsStack.length - 1].points : null;
+        if (points && points.length === 8 && this._videoWidth > 0 && this._videoHeight) {
             var i;
             var viewResult = [];
             switch (this._canvas.rotDegree) {
             case 90:
                 for (i = 0; i < 4; i++) {
-                    viewResult.push((1 - this._points[i * 2 + 1] / this._videoHeight) * this._canvas.width);
-                    viewResult.push(this._points[i * 2]  / this._videoWidth * this._canvas.height);
+                    viewResult.push((1 - points[i * 2 + 1] / this._videoHeight) * this._canvas.width);
+                    viewResult.push(points[i * 2]  / this._videoWidth * this._canvas.height);
                 };
                 break;
             case 180:
                 for (i = 0; i < 4; i++) {
-                    viewResult.push((1 - this._points[i * 2] / this._videoWidth) * this._canvas.width);
-                    viewResult.push((1 - this._points[i * 2 + 1] / this._videoHeight) * this._canvas.height);
+                    viewResult.push((1 - points[i * 2] / this._videoWidth) * this._canvas.width);
+                    viewResult.push((1 - points[i * 2 + 1] / this._videoHeight) * this._canvas.height);
                 };
                 break;
             case 270:
                 for (i = 0; i < 4; i++) {
-                    viewResult.push(this._points[i * 2 + 1] / this._videoHeight * this._canvas.width);
-                    viewResult.push((1 - this._points[i * 2]  / this._videoWidth ) * this._canvas.height);
+                    viewResult.push(points[i * 2 + 1] / this._videoHeight * this._canvas.width);
+                    viewResult.push((1 - points[i * 2]  / this._videoWidth ) * this._canvas.height);
                 };
                 break;
             default:
                 for (i = 0; i < 4; i++) {
-                    viewResult.push(this._points[i * 2] / this._videoWidth * this._canvas.width);
-                    viewResult.push(this._points[i * 2 + 1] / this._videoHeight * this._canvas.height);
+                    viewResult.push(points[i * 2] / this._videoWidth * this._canvas.width);
+                    viewResult.push(points[i * 2 + 1] / this._videoHeight * this._canvas.height);
                 };
             }
             c2.fillStyle = this._inCapturePhoto ? "rgba(128,255,128,0.50)" : "rgba(128,255,128,0.10)";
@@ -450,7 +448,80 @@ CameraUI.prototype.onFrameArrived = function() {
             } catch (e) {
             }
         }
-        this._points = result;
+        var now = new Date();
+        var time = now.getTime();
+        // delete old points
+        var maxTimeSpan = 2000;
+        var avgTimeSpan = 100;
+        var minRedundancy = 3;
+        var i = 0, j = 0;
+        if (this._pointsStack.length > 0) {
+            avgTimeSpan = (time - this._pointsStack[0].time) / this._pointsStack.length;
+            if (time - this._pointsStack[this._pointsStack.length - 1].time > 3 * avgTimeSpan) {
+                this._pointsStack.length = 0;
+            } else {
+                if (this._pointsStack.length > minRedundancy * 3) {
+                    this._pointsStack.splice(0, 1);
+                    avgTimeSpan = (time - this._pointsStack[0].time) / this._pointsStack.length;
+                }
+                maxTimeSpan = Math.min(avgTimeSpan * minRedundancy * 3, 2000);
+                for (i = 0; i < this._pointsStack.length; i++) {
+                    var timeSpan = time - this._pointsStack[i].time;
+                    if (timeSpan < maxTimeSpan) {
+                        break;
+                    }
+                }
+                if (i > 0) {
+                    this._pointsStack.splice(0, i);
+                }
+            }
+        }
+        if (result && result.length === 8) {
+            // calculate diff & mean
+            if (this._pointsStack.length >= minRedundancy) {
+                maxTimeSpan = time - this._pointsStack[0].time;
+                avgTimeSpan = maxTimeSpan / this._pointsStack.length;
+                var sumTimeSpan = this._pointsStack.length * (maxTimeSpan + avgTimeSpan) / 2;
+                var pointsDiff = [0,0,0,0,0,0,0,0];
+                var pointsMean = result.slice(0);
+                for (i = this._pointsStack.length - 1; i >= 0 && result; i--) {
+                    var points = this._pointsStack[i].points;
+                    var prevTime = this._pointsStack[i].time;
+                    for (j = 0; j < 8; j++) {
+                        var value = result[j];
+                        var prevValue = points[j];
+                        var diff = value - prevValue;
+                        var curTimeSpan = time - prevTime;
+                        pointsDiff[j] += Math.abs(diff) * (maxTimeSpan + avgTimeSpan - curTimeSpan) / sumTimeSpan;
+                        if (i >= minRedundancy && pointsDiff[j] > Math.abs(prevValue) / 10) {
+                            result = null;
+                            this._startTime = 0;
+                            break;
+                        }
+                        if (i > this._pointsStack.length - minRedundancy) {
+                            pointsMean[j] += prevValue;
+                        } else if (i === this._pointsStack.length - minRedundancy) {
+                            pointsMean[j] /= minRedundancy;
+                        }
+                    }
+                }
+                if (result) {
+                    result = pointsMean;
+                }
+            }
+            if (result) {
+                if (!this._startTime) {
+                    this._startTime = time;
+                }
+                this._pointsStack.push({
+                    points: result,
+                    time: time
+                });
+            }
+        }
+        if (!this._pointsStack.length) {
+            this._startTime = 0;
+        }
     }
     this.drawClippingOverlay();
 };
@@ -461,44 +532,52 @@ CameraUI.prototype.onFrameArrived = function() {
  * @return  {Promise<CaptureResult>}  document capture result or null if search
  *   cancelled.
  */
-CameraUI.prototype.capturing = function (usePropertySet) {
+CameraUI.prototype.capturing = function (usePropertySet, milliseconds, capturePhoto) {
 
     /**
      * Checks for result from media filter. If there is no result
      *   found, returns null.
      */
-    function checkForResult(capture, propertySet, frameReader, captured, fail) {
-        return WinJS.Promise.timeout(200).then(function () {
-            return new WinJS.Promise(function (complete) {
-				if (usePropertySet) {
-                    var value = null;
-                    if (propertySet && captured) {
-                        try {
-                            value = propertySet.lookup(PROPERTY_RESULT);
-                            if (value && !value.length) {
-                                value = null;
-                            }
-                        } catch (e) {
-                            console.error('propertySet.lookup failed: ' + e);
+    function checkForResult(propertySet, captured) {
+        return new WinJS.Promise(function (complete) {
+            if (usePropertySet) {
+                var value = null;
+                if (propertySet && captured) {
+                    try {
+                        value = propertySet.lookup(PROPERTY_RESULT);
+                        if (value && !value.length) {
+                            value = null;
                         }
+                    } catch (e) {
+                        console.error('propertySet.lookup failed: ' + e);
                     }
-                    complete(value);
-                    return WinJS.Promise.as();
-                } else if (captured && typeof captured === "string") {
-                    complete(captured);
-                } else {
-                    complete(null);
                 }
-            });
+                complete(value);
+            } else if (captured && typeof captured === "string") {
+                complete(captured);
+            } else {
+                complete(null);
+            }
         });
     }
 
     var that = this;
-    return checkForResult(this._capture, this._props, this._reader, this._captured, this._fail).then(function (result) {
-        if (that._cancelled)
+    if (!this._inCapturePhoto &&
+        milliseconds &&
+        typeof capturePhoto === "function" &&
+        this._startTime &&
+        this._pointsStack.length > 1 &&
+        this._pointsStack[0].time - this._startTime >= milliseconds) {
+        capturePhoto();
+    }
+    return checkForResult(this._props, this._captured).then(function(result) {
+        if (that._cancelled) {
             return null;
-
-        return result || (that._promise = that.capturing(usePropertySet));
+        }
+        return result ||
+        (that._promise = WinJS.Promise.timeout(200).then(function() {
+            return that.capturing(usePropertySet, milliseconds, capturePhoto);
+        }));
     });
 };
 
@@ -510,7 +589,8 @@ CameraUI.prototype.capturePhoto = function (lowLagPhotoCapture, bDontClip, useEf
 		this._captured = true;
     } else if (this._capture) {
         var that = this;
-        if (!bDontClip && !(this._points && this._points.length === 8)) {
+        var points = this._pointsStack.length > 0 ? this._pointsStack[this._pointsStack.length - 1].points : null;
+        if (!bDontClip && !(points && points.length === 8)) {
             this._captureLaterPromise = WinJS.Promise.timeout(CHECK_PLAYING_TIMEOUT).then(function() {
                 return that.capturePhoto(lowLagPhotoCapture, bDontClip, useEffectFilter, quality, fileName, returnBase64, convertToGrayscale, rotationDegree);
             });
@@ -521,7 +601,6 @@ CameraUI.prototype.capturePhoto = function (lowLagPhotoCapture, bDontClip, useEf
         this._captureStarted = false;
         var width = this._videoWidth;
         var height = this._videoHeight;
-        var points = this._points;
         var helper = this._helper;
         var capture = this._capture;
         var fail = this._fail;
@@ -725,7 +804,8 @@ module.exports = {
             videoProps,
             cancelPromise,
             photoProperties,
-            videoPreviewProperties;
+            videoPreviewProperties,
+            milliseconds;
 
         // Save call state for suspend/resume
         CameraUI.openCameraCallArgs = {
@@ -917,8 +997,13 @@ module.exports = {
 
             if (getAutoShutter()) {
                 cancelPromise = WinJS.Promise.timeout(60000).then(cancelPreview);
+                if (photoButton && photoButton.style) {
+                    photoButton.style.display = "none";
+                }
+                if (photoButtonBkg && photoButtonBkg.style) {
+                    photoButtonBkg.style.display = "none";
+                }
             }
-
             capturePreviewFrame.appendChild(capturePreview);
             if (!getDontClip()) {
                 capturePreviewFrame.appendChild(captureCanvas);
@@ -1383,7 +1468,6 @@ module.exports = {
                 }
             })
             .then(function () {
-
                 capturePreview.msZoom = true;
                 capturePreview.src = URL.createObjectURL(capture);
                 capturePreview.play();
@@ -1417,21 +1501,6 @@ module.exports = {
                     }
                     // Ensure CameraStreamState is Streaming
                     return checkCameraStreamState();
-                })
-                .then(function () {
-                    return WinJS.Promise.timeout(CHECK_PLAYING_TIMEOUT).then(function () {
-                        if (getAutoShutter()) {
-                            WinJS.Promise.timeout(getAutoShutter()).then(function () {
-                                if (photoButton && photoButton.style) {
-                                    photoButton.style.display = "none";
-                                }
-                                if (photoButtonBkg && photoButtonBkg.style) {
-                                    photoButtonBkg.style.display = "none";
-                                }
-                                capturePhoto();
-                            });
-                        }
-                    });
                 })
                 .then(function () {
                     resizePreview();
@@ -1571,7 +1640,7 @@ module.exports = {
                 });
             }
             checkCancelled();
-            return camera.capturing(getUseEffectFilter());
+            return camera.capturing(getUseEffectFilter(), getAutoShutter(), capturePhoto);
         })
         .then(function (result) {
             // Suppress null result (cancel) on suspending
