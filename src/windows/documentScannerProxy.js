@@ -446,6 +446,7 @@ CameraUI.prototype.onFrameArrived = function() {
             try {
                 result = this._helper.getPointsFromMediaFrameReader(reader);
             } catch (e) {
+                // error occured
             }
         }
         var now = new Date();
@@ -518,6 +519,10 @@ CameraUI.prototype.onFrameArrived = function() {
                     time: time
                 });
             }
+        }
+        if (!result && this._pointsStack.length > 0 &&
+            time - this._pointsStack[this._pointsStack.length - 1].time > minRedundancy * avgTimeSpan) {
+            this._pointsStack.length = 0;
         }
         if (!this._pointsStack.length) {
             this._startTime = 0;
