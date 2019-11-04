@@ -64,6 +64,11 @@
         </InProcessServer>
       </Extension>
     </config-file>
+    <config-file target="CordovaApp.jsproj" parent="/Project" versions="8.1">
+      <ImportGroup Label="PropertySheets">
+        <Import Project="..\..\plugins\cordova-plugin-document-scanner\src\windows\filter\ClippingCamera\opencvDeploy.props" />
+      </ImportGroup>
+    </config-file>
     <framework src="src/windows/filter/ClippingCamera/ClippingCamera.vcxproj" custom="true" type="projectReference" target="windows" versions="8.1"/>
     <framework src="src/windows/filter/ClippingCamera/ClippingCamera.Phone.vcxproj" custom="true" type="projectReference" target="phone" versions="8.1"/>
     <framework src="src/windows/lib/OpenCVBridge/OpenCVBridge.vcxproj" custom="true" type="projectReference" versions="10.*"/>
