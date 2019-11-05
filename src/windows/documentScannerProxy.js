@@ -449,7 +449,7 @@ CameraUI.prototype.onFrameArrived = function() {
             if (this._pointsStack.length > 1) {
                 avgTimeSpan = (this._pointsStack[this._pointsStack.length - 1].time - this._pointsStack[0].time) / this._pointsStack.length;
             }
-            if (time - this._pointsStack[this._pointsStack.length - 1].time > 3 * avgTimeSpan) {
+            if (time - this._pointsStack[this._pointsStack.length - 1].time > avgTimeSpan * minRedundancy * 3) {
                 this._pointsStack.length = 0;
             } else {
                 if (this._pointsStack.length > minRedundancy * 3) {
@@ -488,7 +488,6 @@ CameraUI.prototype.onFrameArrived = function() {
                         pointsDiff[j] += Math.abs(diff) * (maxTimeSpan + avgTimeSpan - curTimeSpan) / sumTimeSpan;
                         if (i >= minRedundancy && pointsDiff[j] > Math.abs(prevValue) / 4) {
                             result = null;
-                            this._startTime = 0;
                             break;
                         }
                         if (i > this._pointsStack.length - minRedundancy) {
@@ -503,7 +502,7 @@ CameraUI.prototype.onFrameArrived = function() {
                 }
             }
             if (result) {
-                if (!this._startTime) {
+                if (!this._startTime || !this._pointsStack.length) {
                     this._startTime = time;
                 }
                 this._pointsStack.push({
@@ -513,7 +512,7 @@ CameraUI.prototype.onFrameArrived = function() {
             }
         }
         if (!result && this._pointsStack.length > 0 &&
-            time - this._pointsStack[this._pointsStack.length - 1].time > minRedundancy * avgTimeSpan) {
+            time - this._pointsStack[this._pointsStack.length - 1].time > avgTimeSpan * minRedundancy * 3) {
             this._pointsStack.length = 0;
         }
         if (!this._pointsStack.length) {
