@@ -446,13 +446,17 @@ CameraUI.prototype.onFrameArrived = function() {
         var minRedundancy = 3;
         var i = 0, j = 0;
         if (this._pointsStack.length > 0) {
-            avgTimeSpan = (time - this._pointsStack[0].time) / this._pointsStack.length;
+            if (this._pointsStack.length > 1) {
+                avgTimeSpan = (this._pointsStack[this._pointsStack.length - 1].time - this._pointsStack[0].time) / this._pointsStack.length;
+            }
             if (time - this._pointsStack[this._pointsStack.length - 1].time > 3 * avgTimeSpan) {
                 this._pointsStack.length = 0;
             } else {
                 if (this._pointsStack.length > minRedundancy * 3) {
                     this._pointsStack.splice(0, 1);
-                    avgTimeSpan = (time - this._pointsStack[0].time) / this._pointsStack.length;
+                    if (this._pointsStack.length > 1) {
+                        avgTimeSpan = (this._pointsStack[this._pointsStack.length - 1].time - this._pointsStack[0].time) / this._pointsStack.length;
+                    }
                 }
                 maxTimeSpan = Math.min(avgTimeSpan * minRedundancy * 3, 2000);
                 for (i = 0; i < this._pointsStack.length; i++) {
@@ -461,7 +465,7 @@ CameraUI.prototype.onFrameArrived = function() {
                         break;
                     }
                 }
-                if (i > 0) {
+                if (i < this._pointsStack.length) {
                     this._pointsStack.splice(0, i);
                 }
             }
@@ -470,7 +474,6 @@ CameraUI.prototype.onFrameArrived = function() {
             // calculate diff & mean
             if (this._pointsStack.length >= minRedundancy) {
                 maxTimeSpan = time - this._pointsStack[0].time;
-                avgTimeSpan = maxTimeSpan / this._pointsStack.length;
                 var sumTimeSpan = this._pointsStack.length * (maxTimeSpan + avgTimeSpan) / 2;
                 var pointsDiff = [0,0,0,0,0,0,0,0];
                 var pointsMean = result.slice(0);
@@ -483,7 +486,7 @@ CameraUI.prototype.onFrameArrived = function() {
                         var diff = value - prevValue;
                         var curTimeSpan = time - prevTime;
                         pointsDiff[j] += Math.abs(diff) * (maxTimeSpan + avgTimeSpan - curTimeSpan) / sumTimeSpan;
-                        if (i >= minRedundancy && pointsDiff[j] > Math.abs(prevValue) / 10) {
+                        if (i >= minRedundancy && pointsDiff[j] > Math.abs(prevValue) / 4) {
                             result = null;
                             this._startTime = 0;
                             break;
