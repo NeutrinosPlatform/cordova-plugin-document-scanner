@@ -24,13 +24,14 @@ using namespace Windows::Foundation;
 
 using namespace cv;
 
-OpenCVHelper::OpenCVHelper()
+OpenCVHelper::OpenCVHelper(bool bConvertToGrayscale, double alpha)
 {
 	m_prevPoints.clear();
 	m_bDoClip = false;
 	m_nQuality = 100;
-	m_bConvertToGrayscale = false;
+	m_bConvertToGrayscale = bConvertToGrayscale;
 	m_nRotation = 0;
+	m_alpha = alpha;
 }
 
 bool comp_horz(cv::Point2f a, cv::Point2f b)
@@ -65,9 +66,21 @@ Platform::Array<int>^ OpenCVHelper::GetPoints(Windows::Graphics::Imaging::Softwa
 		resize(inputMat,scaled,cv::Size(),scale,scale,INTER_NEAREST);
 	    width = scaled.cols;
 	    height = scaled.rows;
-	    blur(scaled, inputMat, cv::Size(3, 3));
+		if (m_alpha != 1.0) {
+	        Mat conv;
+		    scaled.convertTo(conv, -1, m_alpha, 0);
+	        blur(conv, inputMat, cv::Size(5, 5));
+		} else {
+	        blur(scaled, inputMat, cv::Size(5, 5));
+		}
 	} else {
-	    blur(inputMat, inputMat, cv::Size(3, 3));
+		if (m_alpha != 1.0) {
+	        Mat conv;
+			inputMat.convertTo(conv, -1, m_alpha, 0);
+			blur(conv, inputMat, cv::Size(5, 5));
+		} else {
+			blur(inputMat, inputMat, cv::Size(5, 5));
+		}
 	}
 	int w8 = width / 8;
 	int h8= height / 8;
@@ -244,8 +257,9 @@ void OpenCVHelper::ClipToPoints(Windows::Graphics::Imaging::SoftwareBitmap^ inpu
 
 	// apply perspective transformation
 	if (m_bConvertToGrayscale) {
-		Mat workMat;
-        cvtColor(inputMat, workMat, CV_BGRA2GRAY);
+		Mat grayMat, workMat;
+        cvtColor(inputMat, grayMat, CV_BGRA2GRAY);
+        cvtColor(grayMat, workMat, CV_GRAY2BGRA);
 	    warpPerspective(workMat, outputMat, transmtx, outputMat.size());
 	} else {
 	    warpPerspective(inputMat, outputMat, transmtx, outputMat.size());
@@ -264,7 +278,7 @@ bool OpenCVHelper::TryConvert(SoftwareBitmap^ from, Mat& convertedMat)
 
     Mat mat(from->PixelHeight,
         from->PixelWidth,
-        CV_8UC4, // assume input SoftwareBitmap is BGRA8
+        CV_8UC4, // assume input SoftwareBitmap is BGRA8 
         (void*)pPixels);
 
     // shallow copy because we want convertedMat.data = pPixels

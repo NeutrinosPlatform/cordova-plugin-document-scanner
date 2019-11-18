@@ -20,7 +20,7 @@ namespace OpenCVBridge
     public ref class OpenCVHelper sealed
     {
     public:
-        OpenCVHelper();
+        OpenCVHelper(bool bConvertToGrayscale, double alpha);
 
         // Graphics detection operators
         Platform::Array<int>^ GetPoints(Windows::Graphics::Imaging::SoftwareBitmap^ input);
@@ -37,6 +37,7 @@ namespace OpenCVBridge
 		UINT32						m_nQuality;
 		boolean			            m_bConvertToGrayscale;
 		UINT32						m_nRotation;
+		double						m_alpha;
 
 		std::vector<cv::Point>      m_prevPoints;
 

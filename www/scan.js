@@ -1,3 +1,4 @@
+﻿cordova.define("cordova-plugin-document-scanner.scan", function(require, exports, module) {
 
 var argscheck = require('cordova/argscheck'),
 	exec = require("cordova/exec");
@@ -7,6 +8,12 @@ module.exports = {
 		function toInt(value) {
 			if (typeof value === "string") {
 				return parseInt(value);
+			}
+			return value;
+		}
+		function toFloat(value) {
+			if (typeof value === "string") {
+				return parseFloat(value);
 			}
 			return value;
 		}
@@ -29,8 +36,11 @@ module.exports = {
             var maxResolution = toInt(options.maxResolution); // maximum pixels size of image
             var autoShutter = toInt(options.autoShutter); // take photo automatically after timeout
             var rotationDegree = toInt(options.rotationDegree); // rotate video preview
+            var brightnessValue = toInt(options.brightnessValue); // manual brightness
+            var focusValue = toInt(options.focusValue); // manual focus
+            var contrastValue = toFloat(options.contrastValue); // manual contrast
 
-			var args = [sourceType, fileName, quality, returnBase64, convertToGrayscale, dontClip, maxResolution, autoShutter, rotationDegree];
+			var args = [sourceType, fileName, quality, returnBase64, convertToGrayscale, dontClip, maxResolution, autoShutter, rotationDegree, brightnessValue, focusValue, contrastValue];
 
         	exec(successCallback, errorCallback, "Scan", "scanDoc", args);
     	}
@@ -40,3 +50,5 @@ module.exports = {
     	}
     }
 };
+
+});

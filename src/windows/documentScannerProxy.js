@@ -305,10 +305,10 @@ CameraUI.prototype.init = function (capture, videoWidth, videoHeight, preview, c
     this._startTime = 0;
 };
 
-CameraUI.prototype.attach = function(reader) {
+CameraUI.prototype.attach = function(reader, convertToGrayscale, alpha) {
     this._reader = reader;
     if (reader) {
-        this._helper = new OpenCVBridge.OpenCVHelper();
+        this._helper = new OpenCVBridge.OpenCVHelper(convertToGrayscale, alpha);
         reader.acquisitionMode = Windows.Media.Capture.Frames &&
             Windows.Media.Capture.Frames.MediaFrameReaderAcquisitionMode &&
             Windows.Media.Capture.Frames.MediaFrameReaderAcquisitionMode.realtime;
@@ -486,7 +486,7 @@ CameraUI.prototype.onFrameArrived = function() {
                         var diff = value - prevValue;
                         var curTimeSpan = time - prevTime;
                         pointsDiff[j] += Math.abs(diff) * (maxTimeSpan + avgTimeSpan - curTimeSpan) / sumTimeSpan;
-                        if (i >= minRedundancy && pointsDiff[j] > Math.abs(prevValue) / 4) {
+                        if (i >= minRedundancy && pointsDiff[j] > Math.abs(prevValue) / 10) {
                             result = null;
                             break;
                         }
@@ -512,7 +512,7 @@ CameraUI.prototype.onFrameArrived = function() {
             }
         }
         if (!result && this._pointsStack.length > 0 &&
-            time - this._pointsStack[this._pointsStack.length - 1].time > avgTimeSpan * minRedundancy * 3) {
+            time - this._pointsStack[this._pointsStack.length - 1].time > avgTimeSpan * minRedundancy) {
             this._pointsStack.length = 0;
         }
         if (!this._pointsStack.length) {
@@ -802,53 +802,64 @@ module.exports = {
             milliseconds;
 
         // Save call state for suspend/resume
-        CameraUI.openCameraCallArgs = {
+        CameraUI.scanDocCallArgs = {
             success: success,
             fail: fail,
             args: args
         };
 
         function getSourceType() {
-            return CameraUI.openCameraCallArgs.args && CameraUI.openCameraCallArgs.args[0];
+            return CameraUI.scanDocCallArgs.args && CameraUI.scanDocCallArgs.args[0];
 		}
         function getFileName() {
-            return (CameraUI.openCameraCallArgs.args && CameraUI.openCameraCallArgs.args[1] || "image") + ".jpg";
+            return (CameraUI.scanDocCallArgs.args && CameraUI.scanDocCallArgs.args[1] || "image") + ".jpg";
 		}
         function getQuality() {
-            return CameraUI.openCameraCallArgs.args && CameraUI.openCameraCallArgs.args[2] ?
-            Math.floor((1.0 - (CameraUI.openCameraCallArgs.args[2] - 1.0) / 4.0) * 100.0)
+            return CameraUI.scanDocCallArgs.args && CameraUI.scanDocCallArgs.args[2] ?
+            Math.floor((1.0 - (CameraUI.scanDocCallArgs.args[2] - 1.0) / 4.0) * 100.0)
             : 100;
         }
         function getReturnBase64() {
-            return CameraUI.openCameraCallArgs.args && CameraUI.openCameraCallArgs.args[3];
+            return CameraUI.scanDocCallArgs.args && CameraUI.scanDocCallArgs.args[3];
         }
         function getConvertToGrayscale() {
-            return CameraUI.openCameraCallArgs.args && CameraUI.openCameraCallArgs.args[4];
+            return CameraUI.scanDocCallArgs.args && CameraUI.scanDocCallArgs.args[4];
         }
         function getDontClip() {
-            return CameraUI.openCameraCallArgs.args && CameraUI.openCameraCallArgs.args[5];
+            return CameraUI.scanDocCallArgs.args && CameraUI.scanDocCallArgs.args[5];
         }
         function getDesiredMaxResolution() {
-            return CameraUI.openCameraCallArgs.args && CameraUI.openCameraCallArgs.args[6];
+            return CameraUI.scanDocCallArgs.args && CameraUI.scanDocCallArgs.args[6];
         }
         function getAutoShutter() {
-            return CameraUI.openCameraCallArgs.args && CameraUI.openCameraCallArgs.args[7];
+            return CameraUI.scanDocCallArgs.args && CameraUI.scanDocCallArgs.args[7];
         }
         function getRotationDegree() {
-            return CameraUI.openCameraCallArgs.args && CameraUI.openCameraCallArgs.args[8];
+            return CameraUI.scanDocCallArgs.args && CameraUI.scanDocCallArgs.args[8];
         }
+        function getBrightnessValue() {
+            return CameraUI.scanDocCallArgs.args && CameraUI.scanDocCallArgs.args[9];
+        }
+        function getFocusValue() {
+            return CameraUI.scanDocCallArgs.args && CameraUI.scanDocCallArgs.args[10];
+        }
+        function getContrastValue() {
+            return (CameraUI.scanDocCallArgs.args && typeof CameraUI.scanDocCallArgs.args[11] === "number") ?
+                CameraUI.scanDocCallArgs.args[11] : 1.0;
+        }
+
         function getAppBarSize() {
-            /*if (CameraUI.openCameraCallArgs.args && CameraUI.openCameraCallArgs.args[9]) {
-                if (typeof CameraUI.openCameraCallArgs.args[9] === "string") {
-                    return parseInt(CameraUI.openCameraCallArgs.args[9]);
+            /*if (CameraUI.scanDocCallArgs.args && CameraUI.scanDocCallArgs.args[12]) {
+                if (typeof CameraUI.scanDocCallArgs.args[12] === "string") {
+                    return parseInt(CameraUI.scanDocCallArgs.args[12]);
                 }
-                return CameraUI.openCameraCallArgs.args[9];
+                return CameraUI.scanDocCallArgs.args[12];
             }*/
             return null;
         }
         function getAppBarText() {
-            /*if (CameraUI.openCameraCallArgs.args && CameraUI.openCameraCallArgs.args[10]) {
-                return CameraUI.openCameraCallArgs.args[10];
+            /*if (CameraUI.scanDocCallArgs.args && CameraUI.scanDocCallArgs.args[13]) {
+                return CameraUI.scanDocCallArgs.args[13];
             }*/
             return null;
         }
@@ -1131,6 +1142,17 @@ module.exports = {
             }
         }
 
+        function trySetValue(obj, percent) {
+            if (typeof percent === "number" &&
+                obj && obj.capabilities &&
+                typeof obj.capabilities.min === "number" &&
+                typeof obj.capabilities.max === "number" &&
+                typeof obj.trySetValue === "function") {
+                var value = Math.round(percent * (obj.capabilities.max - obj.capabilities.min) / 100 + obj.capabilities.min);
+                obj.trySetValue(value);
+            }
+        }
+
         function tryFocus(controller) {
 
             var result = WinJS.Promise.wrap();
@@ -1147,6 +1169,14 @@ module.exports = {
                     console.log('Failed to access focus control for current camera: ' + err);
                     return result;
                 }
+            }
+
+            if (getBrightnessValue()) {
+                trySetValue(controller.brightness, getBrightnessValue());
+            }
+            if (getFocusValue()) {
+                trySetValue(controller.focus, getFocusValue());
+                return result;
             }
 
             if (!controller.focusControl || !controller.focusControl.supported) {
@@ -1196,32 +1226,38 @@ module.exports = {
         }
 
         function setupFocus(controller) {
+            if (getBrightnessValue()) {
+                trySetValue(controller.brightness, getBrightnessValue());
+            }
+            if (getFocusValue()) {
+                trySetValue(controller.focus, getFocusValue());
+            } else {
+                var focusControl = controller.focusControl;
+                if (focusControl && focusControl.supported && typeof focusControl.configure === "function") {
+                    function supportsFocusMode(mode) {
+                        return (focusControl.supportedFocusModes &&
+                            typeof focusControl.supportedFocusModes.indexOf === "function" &&
+                            focusControl.supportedFocusModes.indexOf(mode) >= 0) ? true : false;
+                    }
+                    var focusConfig = new Windows.Media.Devices.FocusSettings();
 
-            var focusControl = controller.focusControl;
-            if (focusControl && focusControl.supported && typeof focusControl.configure === "function") {
-                function supportsFocusMode(mode) {
-                    return (focusControl.supportedFocusModes &&
-                        typeof focusControl.supportedFocusModes.indexOf === "function" &&
-                        focusControl.supportedFocusModes.indexOf(mode) >= 0) ? true : false;
+                    focusConfig.autoFocusRange = Windows.Media.Devices.AutoFocusRange.macro;
+
+                    // Determine a focus position if the focus search fails:
+                    focusConfig.disableDriverFallback = false;
+
+                    if (supportsFocusMode(Windows.Media.Devices.FocusMode.continuous)) {
+                        console.log("Device supports continuous focus mode");
+                        focusConfig.mode = Windows.Media.Devices.FocusMode.continuous;
+                    } else if (supportsFocusMode(Windows.Media.Devices.FocusMode.auto)) {
+                        console.log("Device doesn\'t support continuous focus mode, switching to autofocus mode");
+                        focusConfig.mode = Windows.Media.Devices.FocusMode.auto;
+                    }
+
+                    focusControl.configure(focusConfig);
+                    //} else if (controller.focus && typeof controller.focus.trySetAuto === "function") {
+                    //    controller.focus.trySetAuto(true);
                 }
-                var focusConfig = new Windows.Media.Devices.FocusSettings();
-
-                focusConfig.autoFocusRange = Windows.Media.Devices.AutoFocusRange.macro;
-
-                // Determine a focus position if the focus search fails:
-                focusConfig.disableDriverFallback = false;
-
-                if (supportsFocusMode(Windows.Media.Devices.FocusMode.continuous)) {
-                    console.log("Device supports continuous focus mode");
-                    focusConfig.mode = Windows.Media.Devices.FocusMode.continuous;
-                } else if (supportsFocusMode(Windows.Media.Devices.FocusMode.auto)) {
-                    console.log("Device doesn\'t support continuous focus mode, switching to autofocus mode");
-                    focusConfig.mode = Windows.Media.Devices.FocusMode.auto;
-                }
-
-                focusControl.configure(focusConfig);
-            //} else if (controller.focus && typeof controller.focus.trySetAuto === "function") {
-            //    controller.focus.trySetAuto(true);
             }
 
             // Continuous focus should start only after preview has started. See 'Remarks' at
@@ -1234,13 +1270,11 @@ module.exports = {
                         .then(function () {
                             return waitForIsPlaying();
                         });
-                } else if (focusControl && focusControl.supported) {
+                } else {
                     return WinJS.Promise.timeout(INITIAL_FOCUS_DELAY)
                         .then(function() {
                             return tryFocus();
                         });
-                } else {
-                    return WinJS.Promise.as();
                 }
             }
             return waitForIsPlaying();
@@ -1614,7 +1648,7 @@ module.exports = {
 					if (getDontClip()) {
 						return WinJS.Promise.as();
 					}
-					return camera.attach(frameReader);
+					return camera.attach(frameReader, getConvertToGrayscale(), getContrastValue());
 				});
             }
         })
@@ -1628,7 +1662,7 @@ module.exports = {
                             return camera.createReader(true);
                         }).then(function(frameReader) {
                             checkCancelled();
-                            camera.attach(frameReader);
+                            camera.attach(frameReader, getConvertToGrayscale(), getContrastValue());
                         });
                     }
                 });
@@ -1684,7 +1718,7 @@ function suspend(args) {
 
 function resume() {
     CameraUI.suspended = false;
-    module.exports.openCamera(CameraUI.openCameraCallArgs.success, CameraUI.openCameraCallArgs.fail, CameraUI.openCameraCallArgs.args);
+    module.exports.scanDoc(CameraUI.scanDocCallArgs.success, CameraUI.scanDocCallArgs.fail, CameraUI.scanDocCallArgs.args);
 }
 
 function onVisibilityChanged() {
