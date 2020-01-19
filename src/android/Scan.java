@@ -73,6 +73,10 @@ public class Scan extends CordovaPlugin {
                 this.callbackContext.error("Illegal Argument Exception");
                 PluginResult r = new PluginResult(PluginResult.Status.ERROR);
                 this.callbackContext.sendPluginResult(r);
+            } catch (Exception e) {
+                this.callbackContext.error("Something went wrong! Try reducing the quality option.");
+                PluginResult r = new PluginResult(PluginResult.Status.ERROR);
+                this.callbackContext.sendPluginResult(r);
             }
 
             return true;
