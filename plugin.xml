@@ -2,8 +2,10 @@
 <plugin xmlns="http://www.phonegap.com/ns/plugins/1.0" id="cordova-plugin-document-scanner" version="4.2.3">
 
   <name>Scan</name>
+  <description>Cordova Document Scanner Plugin</description>
+  <keywords>cordova,camera,document,scan</keywords>
   <engines>
-    <engine name="cordova-android" version=">=6.4.0" />
+    <engine name="cordova-android" version=">=6.0.0" />
   </engines>
   <asset src="www/scan.js" target="js/scan.js"/>
   <js-module src="www/scan.js" name="scan">
@@ -45,6 +47,32 @@
     <source-file src="src/ios/Scan.m" target-dir="ScanPlugin"/>
     <framework src="src/ios/TOCropViewController.framework" custom="true" embed="true"/>
     <framework src="src/ios/IRLDocumentScanner.framework" custom="true" embed="true"/>
+  </platform>
+
+  <platform name="windows">
+    <js-module src="src/windows/documentScannerProxy.js" name="DocumentScannerProxy">
+      <merges target=""/>
+    </js-module>
+    <config-file target="package.appxmanifest" parent="/Package/Capabilities">
+      <DeviceCapability Name="webcam"/>
+    </config-file>
+    <config-file target="package.appxmanifest" parent="/Package/Extensions" versions="8.1">
+      <Extension Category="windows.activatableClass.inProcessServer">
+        <InProcessServer>
+          <Path>ClippingCamera.dll</Path>
+          <ActivatableClass ActivatableClassId="ClippingCamera.ImageClipping" ThreadingModel="both" />
+        </InProcessServer>
+      </Extension>
+    </config-file>
+    <config-file target="CordovaApp.jsproj" parent="/Project" versions="8.1">
+      <ImportGroup Label="PropertySheets">
+        <Import Project="..\..\plugins\cordova-plugin-document-scanner\src\windows\filter\ClippingCamera\opencvDeploy.props" />
+      </ImportGroup>
+    </config-file>
+    <framework src="src/windows/filter/ClippingCamera/ClippingCamera.vcxproj" custom="true" type="projectReference" target="windows" versions="8.1"/>
+    <framework src="src/windows/filter/ClippingCamera/ClippingCamera.Phone.vcxproj" custom="true" type="projectReference" target="phone" versions="8.1"/>
+    <framework src="src/windows/lib/OpenCVBridge/OpenCVBridge.vcxproj" custom="true" type="projectReference" versions="10.*"/>
+    <asset src="src/windows/assets/plugin-document-scanner.css" target="css/plugin-document-scanner.css"/>
   </platform>
 
 </plugin>

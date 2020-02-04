@@ -1,0 +1,12 @@
+import "Windows.Media.idl";
+
+#include <sdkddkver.h>
+
+namespace ClippingCamera
+{
+    [version(NTDDI_WIN8)]
+    runtimeclass ImageClipping
+    {
+        interface Windows.Media.IMediaExtension;
+    }
+}

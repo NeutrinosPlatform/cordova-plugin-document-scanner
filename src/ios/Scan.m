@@ -18,6 +18,7 @@
                                          
     scanner.showControls = YES;
     scanner.showAutoFocusWhiteRectangle = YES;
+    [scanner setModalPresentationStyle:UIModalPresentationOverFullScreen];
 
     [[self topViewController] presentViewController:scanner animated:YES completion:nil];
 }
