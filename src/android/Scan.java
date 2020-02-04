@@ -103,6 +103,8 @@ public class Scan extends CordovaPlugin {
             } else {
                 this.callbackContext.error("null data from scan libary");
             }
+        } else {
+            this.callbackContext.error("Incorrect result or user canceled the action.");
         }
     }
 
