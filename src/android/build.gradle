@@ -7,5 +7,5 @@ allprojects {
 }
 
 dependencies {
-	implementation 'com.github.NeutrinosPlatform:scanlibrary:2.4'
+	implementation 'com.github.NeutrinosPlatform:scanlibrary:2.5'
 }
