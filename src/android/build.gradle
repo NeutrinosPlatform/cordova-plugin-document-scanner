@@ -7,5 +7,5 @@ allprojects {
 }
 
 dependencies {
-	implementation 'com.github.NeutrinosPlatform:scanlibrary:2.5'
+	implementation 'git@github.com:anshuman61/scanlibrary.git'
 }
