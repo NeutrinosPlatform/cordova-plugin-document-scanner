@@ -31,6 +31,11 @@
       </feature>
     </config-file>
 
+    <source-file src="src/ios/Scan.swift" />
+
+    <dependency id="cordova-plugin-add-swift-support" version="^2.0.2"/>
+    <dependency id="cordova-plugin-cocoapod-support"/>
+
     <preference name="CAMERA_USAGE_DESCRIPTION" default="This app needs camera access"/>
     <config-file target="*-Info.plist" parent="NSCameraUsageDescription">
       <string>$CAMERA_USAGE_DESCRIPTION</string>
@@ -41,10 +46,15 @@
       <string>$PHOTOLIBRARY_USAGE_DESCRIPTION</string>
     </config-file>
 
-    <header-file src="src/ios/Scan.h" target-dir="ScanPlugin"/>
-    <source-file src="src/ios/Scan.m" target-dir="ScanPlugin"/>
-    <framework src="src/ios/TOCropViewController.framework" custom="true" embed="true"/>
-    <framework src="src/ios/IRLDocumentScanner.framework" custom="true" embed="true"/>
+    <podspec>
+         <config>
+             <source url="https://github.com/CocoaPods/Specs.git"/>
+         </config>
+         <pods use-frameworks="true">
+           <pod name="WeScan" git="https://github.com/kbs-fabfel/WeScan" commit="e4488c0"/>
+         </pods>
+    </podspec>
+    
   </platform>
 
 </plugin>
