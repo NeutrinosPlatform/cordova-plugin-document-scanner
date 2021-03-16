@@ -1,9 +1,9 @@
 {
   "name": "cordova-plugin-document-scanner",
-  "version": "4.2.5",
+  "version": "4.3.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/NeutrinosPlatform/cordova-plugin-document-scanner"
+    "url": "https://github.com/SchmidtKBS/cordova-plugin-document-scanner.git"
   },
   "cordova": {
     "id": "cordova-plugin-document-scanner",
