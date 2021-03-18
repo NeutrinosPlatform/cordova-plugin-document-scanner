@@ -13,8 +13,8 @@ var uri = "";
 
         var scannerViewController = ImageScannerController()
 
-        let imageFromLibrary = command.arguments[0] as! Bool
-        if (imageFromLibrary == true) {
+        let imageFromCamera = command.arguments[0] as! Bool
+        if (imageFromCamera == false) {
             scannerViewController = ImageScannerController(image: true)
         }
 
