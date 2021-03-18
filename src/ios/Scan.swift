@@ -11,7 +11,13 @@ var uri = "";
     func scanDoc(_ command: CDVInvokedUrlCommand){
         com = command
 
-        let scannerViewController = ImageScannerController()
+        var scannerViewController = ImageScannerController()
+
+        let imageFromLibrary = command.arguments[0] as! Bool
+        if (imageFromLibrary == true) {
+            scannerViewController = ImageScannerController(image: true)
+        }
+
         scannerViewController.imageScannerDelegate = self
         scannerViewController.modalPresentationStyle = .fullScreen
         
