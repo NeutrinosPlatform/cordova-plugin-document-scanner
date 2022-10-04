@@ -39,7 +39,7 @@ module.exports = {
             var focusValue = toInt(options.focusValue); // manual focus
             var contrastValue = toFloat(options.contrastValue); // manual contrast
 
-			var args = [sourceType, fileName, quality, returnBase64, convertToGrayscale, dontClip, maxResolution, autoShutter, rotationDegree, brightnessValue, focusValue, contrastValue];
+			var args = [sourceType, fileName, quality, returnBase64, convertToGrayscale, dontClip, maxResolution, autoShutter];
 
         	exec(successCallback, errorCallback, "Scan", "scanDoc", args);
     	}
