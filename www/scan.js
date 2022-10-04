@@ -1,5 +1,4 @@
-﻿cordova.define("cordova-plugin-document-scanner.scan", function(require, exports, module) {
-
+﻿
 var argscheck = require('cordova/argscheck'),
 	exec = require("cordova/exec");
 
@@ -50,5 +49,3 @@ module.exports = {
     	}
     }
 };
-
-});
